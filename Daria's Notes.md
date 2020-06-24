@@ -35,7 +35,9 @@
             - The lattice plane shifts like a spiral staircase 
         - edge dislocation
             - The dislocation moves parallel to the direction of stress
-    - Discrete dislocation dynamics = ?
+##### Material Science Notes Summary
+- 
+
 #### Math Notes
 - https://www.youtube.com/watch?v=DgXR2OWQnLc&list=PLDV1Zeh2NRsDGO4--qE8yH72HFL1Km93P
     - Graph theory
@@ -44,4 +46,17 @@
     - a graph =
     - a cross product =
     - a dot product =
-            
+
+#### Python
+1)
+class Multiples: #unlike java, you don't use public____
+    x = 0
+    for i in range (1000): #colon instead of {}
+      if(i%3==0 or i%5==00 ): #instead of using || and && you just type out "or" "and"
+        x +=i #no semi colon at the end
+    print (x)
+5)
+
+12)
+
+13)
