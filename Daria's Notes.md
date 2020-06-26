@@ -24,7 +24,7 @@
         - thompson tetrahedran notation______________
     - A dislocation is a defect in the lattice (a missing atom)
     - dislocation density = the total dislocation length per unit volume
-    - A sessile dislocation = when the the burgers vector? isn't contained in one of the planes and it can't glide and mvove under applied stress. It CAN move by climb (climb = ).
+    - A sessile dislocation = when the the burgers vector? isn't contained in one of the planes and it can't glide and mvove under applied stress. It CAN move by climb (climb = when the dislocation gets excoted eough to move up rows of atoms).
     - A glissile dislocation = The dislocation can move in its own plane
     - a dislocation can belong to multiple planes, when it moves on one plane and then another plane, its called "cross slip"
     - Types of dislocations:
