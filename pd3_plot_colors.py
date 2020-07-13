@@ -14,7 +14,7 @@ def normalize(a, b, c):
     return vector / np.linalg.norm(vector)
 
 
-def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d):
+def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links):
     """! \brief Creates a graph
     
     Exports a graph from protobuf, and gets the edge and node information
@@ -28,6 +28,7 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
     vertices = graph.state[timestep].nodes
     edges = graph.state[timestep].links
     g = {}
+#     node
    
     for edge in edges:
         not_visited.add(edge.leading)
@@ -38,6 +39,9 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         trailing_neighbors.append(edge.leading)
         g[edge.leading] = leading_neighbors
         g[edge.trailing] = trailing_neighbors
+        links[edge.leading] = edge.trailing
+        links[edge.trailing] = edge.leading
+        print(edge.slip)
 
     for node_id in vertices:
         node = vertices[node_id]
@@ -47,6 +51,13 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         node_x = x_axis.dot(node_3d)
         node_y = y_axis.dot(node_3d)
         node_vectors_2d[node_id] = (node_x, node_y)
+        
+        #Extract edge information 
+#         links = {
+#             node_a: {
+#                  node_b: segment_info
+#             }
+#         }
         
     return g
 
@@ -83,7 +94,7 @@ def collect_and_plot(lines):
     
     return xs, ys, zs, x, y, zs
 
-def dfs(graph, node_vectors, not_visited, visited):
+def dfs(graph, node_vectors, not_visited, visited, links):
     """! \brief Searches graph.
     
     Search the provided graph using depth first search, returns a bunch of lines.
@@ -96,7 +107,7 @@ def dfs(graph, node_vectors, not_visited, visited):
     """
     lines = []
     
-    def search(graph, node_vectors, current, previous, line):
+    def search(graph, node_vectors, current, previous, line, edge):
         neighbors = graph[current]
         here = node_vectors[current]
         branch = line
@@ -114,14 +125,15 @@ def dfs(graph, node_vectors, not_visited, visited):
             return
 
         for node in neighbors:
+            info = links[current][neighbors]
             if node != previous:
-                search(graph, node_vectors, node, here, branch)
+                search(graph, node_vectors, node, here, branch, links)
                 branch = [node_vectors[current]]
     while len(not_visited) > 0:
         start_node = not_visited.pop()
-        search(graph, node_vectors, start_node, None, [])
+        search(graph, node_vectors, start_node, None, [], links)
         
-    return lines           
+    return lines, colors           
                 
 def is_normal(x_axis, y_axis):
     """! \brief Tests wether the given vectors are normal 
@@ -149,12 +161,13 @@ def plot_study3D(study, timestep = 0, do_scatter=False):
     visited = set()
     node_vectors = {}
     node_vectors_2d = {}
+    links = {}
     
     #create the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d)  
+    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links)  
     
     #collect plotting informatoin
-    lines = dfs(g, node_vectors_2d, not_visited, visited)
+    lines = dfs(g, node_vectors_2d, not_visited, visited, links)
     
     xs = []
     ys = []
@@ -189,13 +202,15 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     visited = set()
     node_vectors = {}
     node_vectors_2d = {}
+    links = {}
     
     #creating the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d) 
+    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links) 
     
     #collect the information to plot
-    lines = dfs(g, node_vectors_2d, not_visited, visited)
-
+    lines = dfs(g, node_vectors_2d, not_visited, visited, links)
+    
+    print(links)
     #Plots lines
     lc = mc.LineCollection(lines)
     fig, ax = pl.subplots()
