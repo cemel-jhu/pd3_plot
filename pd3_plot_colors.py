@@ -28,6 +28,8 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
     vertices = graph.state[timestep].nodes
     edges = graph.state[timestep].links
     g = {}
+#     links = { 
+#        node_a: { node_b: segment_info } }
 #     node
    
     for edge in edges:
@@ -39,9 +41,15 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         trailing_neighbors.append(edge.leading)
         g[edge.leading] = leading_neighbors
         g[edge.trailing] = trailing_neighbors
+        
+        
+        
         links[edge.leading] = edge.trailing
         links[edge.trailing] = edge.leading
-        print(edge.slip)
+        if edge.leading not in links:
+            links[edge.leading] = {}
+            links[edge.leading][edge.trailing] = edge.slip
+#         print(edge.slip)
 
     for node_id in vertices:
         node = vertices[node_id]
@@ -52,12 +60,6 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         node_y = y_axis.dot(node_3d)
         node_vectors_2d[node_id] = (node_x, node_y)
         
-        #Extract edge information 
-#         links = {
-#             node_a: {
-#                  node_b: segment_info
-#             }
-#         }
         
     return g
 
@@ -106,8 +108,9 @@ def dfs(graph, node_vectors, not_visited, visited, links):
     Returns: Lines, which is a bunch of lines we can plot
     """
     lines = []
+#     colors = []
     
-    def search(graph, node_vectors, current, previous, line, edge):
+    def search(graph, node_vectors, current, previous, line, links, previous_slip):
         neighbors = graph[current]
         here = node_vectors[current]
         branch = line
@@ -122,18 +125,23 @@ def dfs(graph, node_vectors, not_visited, visited, links):
 
         if not first_visit or end_of_line:
             lines.append(branch)
+#             colors.append(branch.slip)
             return
 
         for node in neighbors:
-            info = links[current][neighbors]
+#             slip = links[current][node]
+            if links!= previous_slip:
+                branch=[here]
             if node != previous:
-                search(graph, node_vectors, node, here, branch, links)
+                search(graph, node_vectors, node, here, branch, links, here)
                 branch = [node_vectors[current]]
+                
+                
     while len(not_visited) > 0:
         start_node = not_visited.pop()
-        search(graph, node_vectors, start_node, None, [], links)
+        search(graph, node_vectors, start_node, None, [], links, None)
         
-    return lines, colors           
+    return lines         
                 
 def is_normal(x_axis, y_axis):
     """! \brief Tests wether the given vectors are normal 
@@ -203,14 +211,22 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     node_vectors = {}
     node_vectors_2d = {}
     links = {}
-    
+#     print(links)
+    colors = []
     #creating the graph
     g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links) 
     
     #collect the information to plot
     lines = dfs(g, node_vectors_2d, not_visited, visited, links)
+#     print(lines)
+#     print()
+    for edge in lines:
+        colors += (edge.slip)
+    print(colors)
     
-    print(links)
+#     for slip in colors:# go through colors and comapre the slip, if it equals each other, they get the same color if its different, it gets a different color
+        
+#     print(links)
     #Plots lines
     lc = mc.LineCollection(lines)
     fig, ax = pl.subplots()
