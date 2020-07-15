@@ -43,15 +43,16 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         trailing_neighbors.append(edge.leading)
         g[edge.leading] = leading_neighbors
         g[edge.trailing] = trailing_neighbors
-        
-        
-        
-        links[edge.leading] = edge.trailing
-        links[edge.trailing] = edge.leading
+
+    for edge in edges: # (1, 2)
         if edge.leading not in links:
             links[edge.leading] = {}
-            links[edge.leading][edge.trailing] = edge.slip
-        print(edge.slip)
+
+        if edge.trailing not in links:
+            links[edge.trailing] = {}
+
+        links[edge.leading][edge.trailing] = edge.slip
+        links[edge.trailing][edge.leading] = edge.slip
 
     for node_id in vertices:
         node = vertices[node_id]
@@ -61,8 +62,7 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         node_x = x_axis.dot(node_3d)
         node_y = y_axis.dot(node_3d)
         node_vectors_2d[node_id] = (node_x, node_y)
-        
-        
+
     return g
 
 def collect_and_plot(lines):
@@ -111,6 +111,7 @@ def dfs(graph, node_vectors, not_visited, visited, links, color):
     """
     lines = []
     color = []
+    color_lookup = {0: "red", 1: "blue"}
     
     def search(graph, node_vectors, current, previous, line, links, previous_slip, color):
         neighbors = graph[current]
@@ -127,17 +128,24 @@ def dfs(graph, node_vectors, not_visited, visited, links, color):
 
         if not first_visit or end_of_line:
             lines.append(branch)
-            color.append(branch)
+            color.append(color_lookup[previous_slip])
             return
 
+        first_iteration = True
         for node in neighbors:
-#             slip = links[current][node]
-            if links!= previous_slip:
+            slip = links[current][node]
+            if slip != previous_slip:
+                # What a hack!
+                # See if you can find a nicer way of doing this
+                if first_iteration:
+                    lines.append(branch)
+                    color.append(color_lookup[previous_slip])
                 branch = [here]
+                    
             if node != previous:
-                search(graph, node_vectors, node, here, branch, links, here, color)
-                branch = [node_vectors[current]]
-                
+                search(graph, node_vectors, node, here, branch, links, slip, color)
+                branch = [here]
+            first_iteration = False
                 
     while len(not_visited) > 0:
         start_node = not_visited.pop()
@@ -174,10 +182,14 @@ def plot_study3D(study, timestep = 0, do_scatter=False):
     links = {}
     colors = []
     #create the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links)  
+    g = create_graph(
+        study, timestep, x_axis, y_axis, not_visited, node_vectors,
+        node_vectors_2d, links)  
+
+    print(links)
     
     #collect plotting informatoin
-    lines = dfs(g, node_vectors_2d, not_visited, visited, links, colors)
+    lines, colors = dfs(g, node_vectors_2d, not_visited, visited, links, colors)
     
     xs = []
     ys = []
@@ -225,29 +237,37 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     
     
 #     for slip in colors:# go through colors and comapre the slip, if it equals each other, they get the same color if its different, it gets a different color
-        
+
 #     print(links)
 #     print(color)
-    #Plots lines
-    print(color)
+    # Plots lines
+    # print(color)
+    """
     final_colors = []
     previous_slip = 0
     for slip in color:
         if slip == color[previous_slip]:
-            slip.color = 'blue'
+            #slip.color = 'blue'
             final_colors += slip
             previous_slip = slip
         else:
-            slip.color = 'red'
+            #slip.color = 'red'
             final_colors += slip
             previous_slip = slip
-    
-    
-    
-    colors = [mcolors.to_rgba(c)
-          for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
+    """
+    # replace color_lookup with this
+    # colors = [mcolors.to_rgba(c)
+    #       for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
 
-    line_segments = LineCollection(lines, colors=color, linestyle='solid')
+    # Just this
+    #colors = []
+    #color_scheme = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    #for c in color_scheme:
+    #    colors.append(mcolors.to_rgba(c))
+    
+    # assert len(color) == len(lines)
+    
+    line_segments = LineCollection(lines, linestyle='solid')
 #     lc = mc.LineCollection(lines, colors = color)
     fig, ax = pl.subplots()
 #     ax.add_collection(lc)
