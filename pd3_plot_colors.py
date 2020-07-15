@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import ipyvolume as ipv
 import numpy as np
 import matplotlib.cm as cm
+from matplotlib import colors as mcolors
+from matplotlib.collections import LineCollection
 from matplotlib import collections as mc
 import pylab as pl
 
@@ -49,7 +51,7 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         if edge.leading not in links:
             links[edge.leading] = {}
             links[edge.leading][edge.trailing] = edge.slip
-#         print(edge.slip)
+        print(edge.slip)
 
     for node_id in vertices:
         node = vertices[node_id]
@@ -96,7 +98,7 @@ def collect_and_plot(lines):
     
     return xs, ys, zs, x, y, zs
 
-def dfs(graph, node_vectors, not_visited, visited, links):
+def dfs(graph, node_vectors, not_visited, visited, links, color):
     """! \brief Searches graph.
     
     Search the provided graph using depth first search, returns a bunch of lines.
@@ -108,9 +110,9 @@ def dfs(graph, node_vectors, not_visited, visited, links):
     Returns: Lines, which is a bunch of lines we can plot
     """
     lines = []
-#     colors = []
+    color = []
     
-    def search(graph, node_vectors, current, previous, line, links, previous_slip):
+    def search(graph, node_vectors, current, previous, line, links, previous_slip, color):
         neighbors = graph[current]
         here = node_vectors[current]
         branch = line
@@ -125,23 +127,23 @@ def dfs(graph, node_vectors, not_visited, visited, links):
 
         if not first_visit or end_of_line:
             lines.append(branch)
-#             colors.append(branch.slip)
+            color.append(branch)
             return
 
         for node in neighbors:
 #             slip = links[current][node]
             if links!= previous_slip:
-                branch=[here]
+                branch = [here]
             if node != previous:
-                search(graph, node_vectors, node, here, branch, links, here)
+                search(graph, node_vectors, node, here, branch, links, here, color)
                 branch = [node_vectors[current]]
                 
                 
     while len(not_visited) > 0:
         start_node = not_visited.pop()
-        search(graph, node_vectors, start_node, None, [], links, None)
+        search(graph, node_vectors, start_node, None, [], links, None, color)
         
-    return lines         
+    return lines, color         
                 
 def is_normal(x_axis, y_axis):
     """! \brief Tests wether the given vectors are normal 
@@ -170,12 +172,12 @@ def plot_study3D(study, timestep = 0, do_scatter=False):
     node_vectors = {}
     node_vectors_2d = {}
     links = {}
-    
+    colors = []
     #create the graph
     g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links)  
     
     #collect plotting informatoin
-    lines = dfs(g, node_vectors_2d, not_visited, visited, links)
+    lines = dfs(g, node_vectors_2d, not_visited, visited, links, colors)
     
     xs = []
     ys = []
@@ -211,26 +213,45 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     node_vectors = {}
     node_vectors_2d = {}
     links = {}
-#     print(links)
-    colors = []
+#   print(links)
+    color = []
     #creating the graph
     g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d, links) 
     
     #collect the information to plot
-    lines = dfs(g, node_vectors_2d, not_visited, visited, links)
+    lines, color = dfs(g, node_vectors_2d, not_visited, visited, links, color)
 #     print(lines)
 #     print()
-    for edge in lines:
-        colors += (edge.slip)
-    print(colors)
+    
     
 #     for slip in colors:# go through colors and comapre the slip, if it equals each other, they get the same color if its different, it gets a different color
         
 #     print(links)
+#     print(color)
     #Plots lines
-    lc = mc.LineCollection(lines)
+    print(color)
+    final_colors = []
+    previous_slip = 0
+    for slip in color:
+        if slip == color[previous_slip]:
+            slip.color = 'blue'
+            final_colors += slip
+            previous_slip = slip
+        else:
+            slip.color = 'red'
+            final_colors += slip
+            previous_slip = slip
+    
+    
+    
+    colors = [mcolors.to_rgba(c)
+          for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
+
+    line_segments = LineCollection(lines, colors=color, linestyle='solid')
+#     lc = mc.LineCollection(lines, colors = color)
     fig, ax = pl.subplots()
-    ax.add_collection(lc)
+#     ax.add_collection(lc)
+    ax.add_collection(line_segments)
     ax.autoscale()
     ax.margins(0.1)
     plt.title("Plot Study")
