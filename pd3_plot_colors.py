@@ -111,7 +111,7 @@ def dfs(graph, node_vectors, not_visited, visited, links, color):
     """
     lines = []
     color = []
-    color_lookup = {0: "red", 1: "blue"}
+    color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
     
     def search(graph, node_vectors, current, previous, line, links, previous_slip, color):
         neighbors = graph[current]
@@ -139,7 +139,7 @@ def dfs(graph, node_vectors, not_visited, visited, links, color):
                 # See if you can find a nicer way of doing this
                 if first_iteration:
                     lines.append(branch)
-                    color.append(color_lookup[previous_slip])
+                    color.append(color_lookup[slip])
                 branch = [here]
                     
             if node != previous:
@@ -267,7 +267,7 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     
     # assert len(color) == len(lines)
     
-    line_segments = LineCollection(lines, linestyle='solid')
+    line_segments = LineCollection(lines, colors = color, linestyle='solid')
 #     lc = mc.LineCollection(lines, colors = color)
     fig, ax = pl.subplots()
 #     ax.add_collection(lc)
