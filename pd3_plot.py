@@ -58,7 +58,6 @@ def collect_and_plot(lines):
     
     Returns: xs, ys, and zs which are points to plot on the graph
     """
-    
     lines = np.array(lines)
     length = len(lines)
     fig = ipv.figure()

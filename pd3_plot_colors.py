@@ -78,8 +78,12 @@ def collect_and_plot(lines):
     
     lines = np.array(lines)
     length = len(lines)
-    fig = ipv.figure()
+#     fig = ipv.figure()   
+    xs = []
+    ys = []
+    zs = []
     for line in lines:
+     
         x = []
         y = []
         z = []
@@ -93,69 +97,69 @@ def collect_and_plot(lines):
         x = np.array(x)
         y = np.array(y)
         z = np.array(z)
-        ipv.pylab.plot(x, y, z, color = 'blue')
+#         ipv.pylab.plot(x, y, z, color = 'blue')
     xs = np.array(xs)
     ys = np.array(ys)
     zs = np.array(zs)
     
-    return xs, ys, zs, x, y, zs
+    return xs, ys, zs, x, y, z
 
-def dfs(g, color):
-    """! \brief Searches graph.
+# def dfs(g, color):
+#     """! \brief Searches graph.
     
-    Search the provided graph using depth first search, returns a bunch of lines.
-    \param Takes in hashmap representing graph.
-    \param Takes in a lookup for node_id to to node_vector.
-    \param Takes in a set representing not_visited nodes
-    \param Takes in an empty set representing nodes that have already been visited
+#     Search the provided graph using depth first search, returns a bunch of lines.
+#     \param Takes in hashmap representing graph.
+#     \param Takes in a lookup for node_id to to node_vector.
+#     \param Takes in a set representing not_visited nodes
+#     \param Takes in an empty set representing nodes that have already been visited
     
-    Returns: Lines, which is a bunch of lines we can plot
-    """
-    lines = []
-    color = []
-    color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
+#     Returns: Lines, which is a bunch of lines we can plot
+#     """
+#     lines = []
+#     color = []
+#     color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
     
-    def search(graph, current, previous, line, previous_slip, color):
-        neighbors = graph[current]
-        here = graph.node_vectors[current]
-        branch = line
-        branch.append(here)
-        print("running")
+#     def search(graph, current, previous, line, previous_slip, color):
+#         neighbors = graph[current]
+#         here = graph.node_vectors[current]
+#         branch = line
+#         branch.append(here)
+#         print("running")
 
-        first_visit = current not in visited
-        end_of_line = (len(neighbors) == 1 and neighbors[0] == previous)
+#         first_visit = current not in visited
+#         end_of_line = (len(neighbors) == 1 and neighbors[0] == previous)
 
-        visited.add(current)
-        if current in graph.not_visited:
-            graph.not_visited.remove(current)
+#         visited.add(current)
+#         if current in graph.not_visited:
+#             graph.not_visited.remove(current)
 
-        if not first_visit or end_of_line:
-            graph.lines.append(branch)
-            color.append(color_lookup[previous_slip])
-            return
+#         if not first_visit or end_of_line:
+#             graph.lines.append(branch)
+#             color.append(color_lookup[previous_slip])
+#             return
 
-        first_iteration = True
-        for node in neighbors:
-            slip = graph.links[current][node]
-            if slip != previous_slip:
-                # What a hack!
-                # See if you can find a nicer way of doing this
-                if first_iteration:
-                    graph.lines.append(branch)
-                    color.append(color_lookup[slip])
-                branch = [here]
+#         first_iteration = True
+#         for node in neighbors:
+#             slip = graph.links[current][node]
+#             if slip != previous_slip:
+#                 # What a hack!
+#                 # See if you can find a nicer way of doing this
+#                 if first_iteration:
+#                     graph.lines.append(branch)
+#                     color.append(color_lookup[slip])
+#                 branch = [here]
                     
-            if node != previous:
-                search(graph, node_vectors, node, here, branch, links, slip, color)
-                branch = [here]
-            first_iteration = False
+#             if node != previous:
+#                 search(graph, node_vectors, node, here, branch, links, slip, color)
+#                 branch = [here]
+#             first_iteration = False
             
-    print(g.not_visited)
-    while len(g.not_visited) > 0:
-        start_node = not_visited.pop()
-        search(graph, start_node, None, [], None, color)
+#     print(g.not_visited)
+#     while len(g.not_visited) > 0:
+#         start_node = not_visited.pop()
+#         search(graph, start_node, None, [], None, color)
         
-    return lines, color         
+#     return lines, color         
                 
 def is_normal(x_axis, y_axis):
     """! \brief Tests wether the given vectors are normal 
@@ -224,15 +228,21 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     if is_normal(x_axis, y_axis) == False:
         raise pd3.Pd3Exception("Provided axes are not normal.")
 
-
+    node_vectors = {}
     color = []
     #creating the graph
-    g = Graph(study, timestep, x_axis, y_axis)
-
+    proto_graph = study.export_protobuf()
+    g = Graph(proto_graph, timestep, x_axis, y_axis, node_vectors)
     
     #collect the information to plot
-    lines, color = dfs(g, color)
-    print(lines)
+    
+    lines, color = Graph.dfs(g, node_vectors)
+    xs, ys, zs, x, y, z = collect_and_plot(lines)
+    segments = list(zip(xs,ys))
+#     for line in lines:
+#         for array in line:
+#             segments.append([array[0], array[1]])
+#     print(len(segments))
   # replace color_lookup with this
     # colors = [mcolors.to_rgba(c)
     #       for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
@@ -244,8 +254,8 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     #    colors.append(mcolors.to_rgba(c))
     
     # assert len(color) == len(lines)
-    
-    line_segments = LineCollection(lines, colors = color, linestyle='solid')
+#     print(segments)
+    line_segments = LineCollection([segments], colors = color, linestyle='solid')
 #     lc = mc.LineCollection(lines, colors = color)
     fig, ax = pl.subplots()
 #     ax.add_collection(lc)
