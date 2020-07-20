@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import ipyvolume as ipv
 import numpy as np
 import matplotlib.cm as cm
-from matplotlib import colors as mcolors
 from matplotlib.collections import LineCollection
 from matplotlib import collections as mc
 import seaborn as sns
@@ -14,16 +13,16 @@ import Graph_class
 importlib.reload(Graph_class)
 from Graph_class import Graph
 
+
 class Plotter:
     # constructor
     def __init__(self, protobuf):
         self.protobuf = protobuf
-        
+
     def normalize(self, a, b, c):
         """Creates a unit vector from a, b, c"""
         vector = np.array([a, b, c])
         return vector / np.linalg.norm(vector)
-
 
     def convert_line_to_coordinates(self, line):
         """! \brief Converts data in line into x,y,z coordinates
@@ -54,7 +53,6 @@ class Plotter:
 
         return xs, ys, zs, x, y, z
 
-
     def is_normal(self, x_axis, y_axis):
         """! \brief Tests wether the given vectors are normal 
 
@@ -67,7 +65,6 @@ class Plotter:
         if x_axis.dot(y_axis) != 0:
             normal = False
         return normal
-
 
     def plot_3D(self, timestep=0, do_scatter=False, color_scheme="tab10"):
         """! \brief Plots the dislocation system in 3D at the given timestep.
@@ -82,7 +79,7 @@ class Plotter:
         lines = []
 
         #creating the graph
-#         proto_graph = study.export_protobuf()
+        #         proto_graph = study.export_protobuf()
         g = Graph(self.protobuf, timestep, color_scheme)
 
         #collect the information to plot
@@ -101,8 +98,11 @@ class Plotter:
             scatter = ipv.scatter(xs, ys, zs)
         ipv.show()
 
-
-    def plot_2D(self, timestep=0, x_axis=(1, 0, 0), y_axis=(0, 1, 0), color_scheme="tab10"):
+    def plot_2D(self,
+                timestep=0,
+                x_axis=(1, 0, 0),
+                y_axis=(0, 1, 0),
+                color_scheme="tab10"):
         """! \brief Plots the dislocation system at the given timestep.
 
         Plots a given dislocation system with orthogonal axes.
@@ -122,7 +122,7 @@ class Plotter:
         color = []
         lines = []
         #creating the graph
-#         proto_graph = study.export_protobuf()
+        #         proto_graph = study.export_protobuf()
         g = Graph(self.protobuf, timestep, color_scheme)
 
         #collect the information to plot
@@ -147,4 +147,3 @@ class Plotter:
         plt.title("Plot Study")
         plt.xlabel("x")
         plt.ylabel("y")
-
