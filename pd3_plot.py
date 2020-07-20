@@ -14,7 +14,8 @@ def normalize(a, b, c):
     return vector / np.linalg.norm(vector)
 
 
-def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d):
+def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors,
+                 node_vectors_2d):
     """! \brief Creates a graph
     
     Exports a graph from protobuf, and gets the edge and node information
@@ -23,12 +24,12 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
     \param Takes in a set which represents the nodes that have been visited
     \param Takes in 2 lookup for node_id to to node_vector.
     """
-        
+
     graph = study.export_protobuf()
     vertices = graph.state[timestep].nodes
     edges = graph.state[timestep].links
     g = {}
-   
+
     for edge in edges:
         not_visited.add(edge.leading)
         not_visited.add(edge.trailing)
@@ -43,12 +44,13 @@ def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, nod
         node = vertices[node_id]
         node_3d = np.array([node.x, node.y, node.z])
         node_vectors[node_id] = node_3d
-        
+
         node_x = x_axis.dot(node_3d)
         node_y = y_axis.dot(node_3d)
         node_vectors_2d[node_id] = (node_x, node_y)
-        
+
     return g
+
 
 def collect_and_plot(lines):
     """! \brief Collects data for lines and plots 
@@ -75,12 +77,13 @@ def collect_and_plot(lines):
         x = np.array(x)
         y = np.array(y)
         z = np.array(z)
-        ipv.pylab.plot(x, y, z, color = 'blue')
+        ipv.pylab.plot(x, y, z, color='blue')
     xs = np.array(xs)
     ys = np.array(ys)
     zs = np.array(zs)
-    
+
     return xs, ys, zs, x, y, zs
+
 
 def dfs(graph, node_vectors, not_visited, visited):
     """! \brief Searches graph.
@@ -94,7 +97,7 @@ def dfs(graph, node_vectors, not_visited, visited):
     Returns: Lines, which is a bunch of lines we can plot
     """
     lines = []
-    
+
     def search(graph, node_vectors, current, previous, line):
         neighbors = graph[current]
         here = node_vectors[current]
@@ -116,12 +119,14 @@ def dfs(graph, node_vectors, not_visited, visited):
             if node != previous:
                 search(graph, node_vectors, node, here, branch)
                 branch = [node_vectors[current]]
+
     while len(not_visited) > 0:
         start_node = not_visited.pop()
         search(graph, node_vectors, start_node, None, [])
-        
-    return lines           
-                
+
+    return lines
+
+
 def is_normal(x_axis, y_axis):
     """! \brief Tests wether the given vectors are normal 
 
@@ -135,7 +140,8 @@ def is_normal(x_axis, y_axis):
         normal = False
     return normal
 
-def plot_study3D(study, timestep = 0, do_scatter=False):
+
+def plot_study3D(study, timestep=0, do_scatter=False):
     """! \brief Plots the dislocation system in 3D at the given timestep.
 
     Plots a given dislocation system with orthogonal axes.
@@ -148,26 +154,27 @@ def plot_study3D(study, timestep = 0, do_scatter=False):
     visited = set()
     node_vectors = {}
     node_vectors_2d = {}
-    
+
     #create the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d)  
-    
+    g = create_graph(study, timestep, x_axis, y_axis, not_visited,
+                     node_vectors, node_vectors_2d)
+
     #collect plotting informatoin
     lines = dfs(g, node_vectors_2d, not_visited, visited)
-    
+
     xs = []
     ys = []
-    zs = []    
+    zs = []
     #organize plotting information and draw lines
     xs, ys, zs = collect_data(lines)
-    
+
     #draw dots
     if do_scatter:
         scatter = ipv.scatter(xs, ys, zs)
     ipv.show()
 
 
-def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
+def plot_study(study, timestep=0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     """! \brief Plots the dislocation system at the given timestep.
 
     Plots a given dislocation system with orthogonal axes.
@@ -180,7 +187,7 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     x_axis = x_axis / np.linalg.norm(x_axis)
     y_axis = np.array(y_axis)
     y_axis = y_axis / np.linalg.norm(y_axis)
-    
+
     if is_normal(x_axis, y_axis) == False:
         raise pd3.Pd3Exception("Provided axes are not normal.")
 
@@ -188,10 +195,11 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     visited = set()
     node_vectors = {}
     node_vectors_2d = {}
-    
+
     #creating the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors, node_vectors_2d) 
-    
+    g = create_graph(study, timestep, x_axis, y_axis, not_visited,
+                     node_vectors, node_vectors_2d)
+
     #collect the information to plot
     lines = dfs(g, node_vectors_2d, not_visited, visited)
 

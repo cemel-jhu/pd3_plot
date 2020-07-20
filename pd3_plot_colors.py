@@ -1,4 +1,3 @@
-
 import pd3
 from pd3.proto.study_pb2 import IMMOBILE
 import matplotlib.pyplot as plt
@@ -15,10 +14,12 @@ import Graph_class
 importlib.reload(Graph_class)
 from Graph_class import Graph
 
+
 def normalize(a, b, c):
     """Creates a unit vector from a, b, c"""
     vector = np.array([a, b, c])
     return vector / np.linalg.norm(vector)
+
 
 def convert_line_to_coordinates(line):
     """! \brief Converts data in line into x,y,z coordinates
@@ -46,10 +47,10 @@ def convert_line_to_coordinates(line):
     xs = np.array(xs)
     ys = np.array(ys)
     zs = np.array(zs)
-    
+
     return xs, ys, zs, x, y, z
 
-                
+
 def is_normal(x_axis, y_axis):
     """! \brief Tests wether the given vectors are normal 
 
@@ -63,7 +64,8 @@ def is_normal(x_axis, y_axis):
         normal = False
     return normal
 
-def plot_study3D(study, timestep = 0, do_scatter=False, color_scheme = "tab10"):
+
+def plot_study3D(study, timestep=0, do_scatter=False, color_scheme="tab10"):
     """! \brief Plots the dislocation system in 3D at the given timestep.
 
     Plots a given dislocation system with orthogonal axes.
@@ -71,33 +73,36 @@ def plot_study3D(study, timestep = 0, do_scatter=False, color_scheme = "tab10"):
     \param timestep The timestep to plot.
     \param do_scatter Whether to plot dislocation nodes or not.
     """
-   
+
     colors = []
     lines = []
-    
+
     #creating the graph
     proto_graph = study.export_protobuf()
     g = Graph(proto_graph, timestep, color_scheme)
-    
+
     #collect the information to plot
     g.dfs(lines, colors)
     lines = np.array(lines)
-    
+
     #segmenting data for the plot
     segments_list = []
     fig = ipv.figure()
     for line, color in zip(lines, colors):
         xs, ys, zs, x, y, z = convert_line_to_coordinates(line)
-        ipv.pylab.plot(x, y, z, color = color)    
-   
+        ipv.pylab.plot(x, y, z, color=color)
+
     #draw dots
     if do_scatter:
         scatter = ipv.scatter(xs, ys, zs)
     ipv.show()
 
 
-def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0), color_scheme = "tab10"):
-    
+def plot_study(study,
+               timestep=0,
+               x_axis=(1, 0, 0),
+               y_axis=(0, 1, 0),
+               color_scheme="tab10"):
     """! \brief Plots the dislocation system at the given timestep.
 
     Plots a given dislocation system with orthogonal axes.
@@ -110,7 +115,7 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0), color_sc
     x_axis = x_axis / np.linalg.norm(x_axis)
     y_axis = np.array(y_axis)
     y_axis = y_axis / np.linalg.norm(y_axis)
-    
+
     if is_normal(x_axis, y_axis) == False:
         raise pd3.Pd3Exception("Provided axes are not normal.")
 
@@ -119,20 +124,22 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0), color_sc
     #creating the graph
     proto_graph = study.export_protobuf()
     g = Graph(proto_graph, timestep, color_scheme)
-    
+
     #collect the information to plot
     g.dfs(lines, color)
     lines = np.array(lines)
-    
+
     #segmenting data for the plot
     segments_list = []
     for line in lines:
         xs, ys, zs, x, y, z = convert_line_to_coordinates(line)
-        segments = list(zip(xs,ys))
+        segments = list(zip(xs, ys))
         segments_list.append(segments)
-        
+
     #Plot
-    line_segments = LineCollection(segments_list, colors = color, linestyle='solid')
+    line_segments = LineCollection(segments_list,
+                                   colors=color,
+                                   linestyle='solid')
     fig, ax = pl.subplots()
     ax.add_collection(line_segments)
     ax.autoscale()

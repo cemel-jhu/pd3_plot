@@ -24,12 +24,12 @@ class Graph:
         self.graph_data = {}
         self.node_vectors = {}
         self.color_scheme = color_scheme
-        
+
         graph = self.proto_graph
         vertices = graph.state[self.timestep].nodes
         edges = graph.state[self.timestep].links
         g = {}
-        
+
         for edge in edges:
             self.not_visited.add(edge.leading)
             self.not_visited.add(edge.trailing)
@@ -57,7 +57,6 @@ class Graph:
 
         self.graph_data = g
 
-                
     def dfs(self, lines, color):
         """! \brief Searches graph.
 
@@ -71,10 +70,12 @@ class Graph:
             """
         sns.set()
         num = 0
-        color_lookup ={}
+        color_lookup = {}
         for colors in sns.color_palette(self.color_scheme, 12):
-            color_lookup.update( {num : colors} )
+            color_lookup.update({num: colors})
             num = num + 1
+
+
 #       color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
         def search(current, previous, line, previous_slip, color):
@@ -85,7 +86,6 @@ class Graph:
 
             branch = line
             branch.append(here)
-
 
             first_visit = current not in self.visited
             end_of_line = (len(neighbors) == 1 and neighbors[0] == previous)
@@ -112,7 +112,7 @@ class Graph:
                     search(node, current, branch, slip, color)
                     branch = [here]
                 first_iteration = False
-            
+
         while len(self.not_visited) > 0:
             start_node = self.not_visited.pop()
             search(start_node, None, [], None, color)
