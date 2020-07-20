@@ -9,11 +9,12 @@ from matplotlib.collections import LineCollection
 from matplotlib import collections as mc
 import pylab as pl
 import importlib
+import seaborn as sns
 
 
 class Graph:
     # constructor
-    def __init__(self, proto_graph, timestep, node_vectors):
+    def __init__(self, proto_graph, timestep, color_scheme):
         #set the instance variables
         self.proto_graph = proto_graph
         self.timestep = timestep
@@ -21,6 +22,8 @@ class Graph:
         self.visited = set()
         self.links = {}
         self.graph_data = {}
+        self.node_vectors = {}
+        self.color_scheme = color_scheme
         
         graph = self.proto_graph
         vertices = graph.state[self.timestep].nodes
@@ -50,12 +53,12 @@ class Graph:
         for node_id in vertices:
             node = vertices[node_id]
             node_3d = np.array([node.x, node.y, node.z])
-            node_vectors[node_id] = node_3d
+            self.node_vectors[node_id] = node_3d
 
         self.graph_data = g
 
                 
-    def dfs(self, node_vectors):
+    def dfs(self, lines, color):
         """! \brief Searches graph.
 
         Search the provided graph using depth first search, returns a bunch of lines.
@@ -66,15 +69,19 @@ class Graph:
 
         Returns: Lines, which is a bunch of lines we can plot
             """
-        lines = []
-        color = []
-        color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
+        sns.set()
+        num = 0
+        color_lookup ={}
+        for colors in sns.color_palette(self.color_scheme, 12):
+            color_lookup.update( {num : colors} )
+            num = num + 1
+#       color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
-        def search(node_vectors, current, previous, line, previous_slip, color):
+        def search(current, previous, line, previous_slip, color):
 
             neighbors = self.graph_data[current]
 
-            here = node_vectors[current]
+            here = self.node_vectors[current]
 
             branch = line
             branch.append(here)
@@ -94,7 +101,6 @@ class Graph:
 
             first_iteration = True
             for node in neighbors:
-
                 slip = self.links[current][node]
                 if slip != previous_slip:
                     if first_iteration:
@@ -103,12 +109,11 @@ class Graph:
                     branch = [here]
 
                 if node != previous:
-                    search(node_vectors, node, current, branch, slip, color)
+                    search(node, current, branch, slip, color)
                     branch = [here]
                 first_iteration = False
             
         while len(self.not_visited) > 0:
             start_node = self.not_visited.pop()
-            search(node_vectors, start_node, None, [], None, color)
-        
+            search(start_node, None, [], None, color)
         return lines, color

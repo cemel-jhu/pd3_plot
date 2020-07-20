@@ -1,3 +1,4 @@
+
 import pd3
 from pd3.proto.study_pb2 import IMMOBILE
 import matplotlib.pyplot as plt
@@ -7,6 +8,7 @@ import matplotlib.cm as cm
 from matplotlib import colors as mcolors
 from matplotlib.collections import LineCollection
 from matplotlib import collections as mc
+import seaborn as sns
 import pylab as pl
 import importlib
 import Graph_class
@@ -61,7 +63,7 @@ def is_normal(x_axis, y_axis):
         normal = False
     return normal
 
-def plot_study3D(study, timestep = 0, do_scatter=False):
+def plot_study3D(study, timestep = 0, do_scatter=False, color_scheme = "tab10"):
     """! \brief Plots the dislocation system in 3D at the given timestep.
 
     Plots a given dislocation system with orthogonal axes.
@@ -70,15 +72,15 @@ def plot_study3D(study, timestep = 0, do_scatter=False):
     \param do_scatter Whether to plot dislocation nodes or not.
     """
    
-    node_vectors = {}
     colors = []
+    lines = []
     
     #creating the graph
     proto_graph = study.export_protobuf()
-    g = Graph(proto_graph, timestep, node_vectors)
+    g = Graph(proto_graph, timestep, color_scheme)
     
     #collect the information to plot
-    lines, colors = Graph.dfs(g, node_vectors)
+    g.dfs(lines, colors)
     lines = np.array(lines)
     
     #segmenting data for the plot
@@ -94,7 +96,8 @@ def plot_study3D(study, timestep = 0, do_scatter=False):
     ipv.show()
 
 
-def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
+def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0), color_scheme = "tab10"):
+    
     """! \brief Plots the dislocation system at the given timestep.
 
     Plots a given dislocation system with orthogonal axes.
@@ -111,15 +114,14 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
     if is_normal(x_axis, y_axis) == False:
         raise pd3.Pd3Exception("Provided axes are not normal.")
 
-    node_vectors = {}
     color = []
-    
+    lines = []
     #creating the graph
     proto_graph = study.export_protobuf()
-    g = Graph(proto_graph, timestep, node_vectors)
+    g = Graph(proto_graph, timestep, color_scheme)
     
     #collect the information to plot
-    lines, color = Graph.dfs(g, node_vectors)
+    g.dfs(lines, color)
     lines = np.array(lines)
     
     #segmenting data for the plot
@@ -129,7 +131,7 @@ def plot_study(study, timestep = 0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
         segments = list(zip(xs,ys))
         segments_list.append(segments)
         
-    #Plot    
+    #Plot
     line_segments = LineCollection(segments_list, colors = color, linestyle='solid')
     fig, ax = pl.subplots()
     ax.add_collection(line_segments)
