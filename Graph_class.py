@@ -71,12 +71,10 @@ class Graph:
         sns.set()
         num = 0
         color_lookup = {}
-        for colors in sns.color_palette(self.color_scheme, 12):
+        for colors in sns.color_palette(self.color_scheme, 13):
             color_lookup.update({num: colors})
             num = num + 1
-
-
-#       color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
+#         color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
         def search(current, previous, line, previous_slip, color):
 

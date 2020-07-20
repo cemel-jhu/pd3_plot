@@ -4,66 +4,37 @@ import matplotlib.pyplot as plt
 import ipyvolume as ipv
 import numpy as np
 import matplotlib.cm as cm
+from matplotlib import colors as mcolors
+from matplotlib.collections import LineCollection
 from matplotlib import collections as mc
+import seaborn as sns
 import pylab as pl
+import importlib
+import Graph_class
+importlib.reload(Graph_class)
+from Graph_class import Graph
+
+class Plotter:
+    # constructor
+    def __init__(self, protobuf):
+        self.protobuf = protobuf
+        
+    def normalize(self, a, b, c):
+        """Creates a unit vector from a, b, c"""
+        vector = np.array([a, b, c])
+        return vector / np.linalg.norm(vector)
 
 
-def normalize(a, b, c):
-    """Creates a unit vector from a, b, c"""
-    vector = np.array([a, b, c])
-    return vector / np.linalg.norm(vector)
+    def convert_line_to_coordinates(self, line):
+        """! \brief Converts data in line into x,y,z coordinates
 
-
-def create_graph(study, timestep, x_axis, y_axis, not_visited, node_vectors,
-                 node_vectors_2d):
-    """! \brief Creates a graph
-    
-    Exports a graph from protobuf, and gets the edge and node information
-    \param Takes in a graph
-    \param Takes in x_axis and y_axis for plotting
-    \param Takes in a set which represents the nodes that have been visited
-    \param Takes in 2 lookup for node_id to to node_vector.
-    """
-
-    graph = study.export_protobuf()
-    vertices = graph.state[timestep].nodes
-    edges = graph.state[timestep].links
-    g = {}
-
-    for edge in edges:
-        not_visited.add(edge.leading)
-        not_visited.add(edge.trailing)
-        leading_neighbors = g.get(edge.leading, [])
-        leading_neighbors.append(edge.trailing)
-        trailing_neighbors = g.get(edge.trailing, [])
-        trailing_neighbors.append(edge.leading)
-        g[edge.leading] = leading_neighbors
-        g[edge.trailing] = trailing_neighbors
-
-    for node_id in vertices:
-        node = vertices[node_id]
-        node_3d = np.array([node.x, node.y, node.z])
-        node_vectors[node_id] = node_3d
-
-        node_x = x_axis.dot(node_3d)
-        node_y = y_axis.dot(node_3d)
-        node_vectors_2d[node_id] = (node_x, node_y)
-
-    return g
-
-
-def collect_and_plot(lines):
-    """! \brief Collects data for lines and plots 
-    
-    Goes through the lines array and collects the x, y, and z values needed to plot and then plots those values
-    \param Takes in an array of node information (x, y, z)
-    
-    Returns: xs, ys, and zs which are points to plot on the graph
-    """
-    lines = np.array(lines)
-    length = len(lines)
-    fig = ipv.figure()
-    for line in lines:
+        Goes through the line array and collects the x, y, and z values needed to plot the line segments
+        \param Takes in an array of node information (x, y, z)
+        Returns: x, y, z, xs, ys, and zs which are points to plot on the graph
+        """
+        xs = []
+        ys = []
+        zs = []
         x = []
         y = []
         z = []
@@ -77,138 +48,103 @@ def collect_and_plot(lines):
         x = np.array(x)
         y = np.array(y)
         z = np.array(z)
-        ipv.pylab.plot(x, y, z, color='blue')
-    xs = np.array(xs)
-    ys = np.array(ys)
-    zs = np.array(zs)
+        xs = np.array(xs)
+        ys = np.array(ys)
+        zs = np.array(zs)
 
-    return xs, ys, zs, x, y, zs
-
-
-def dfs(graph, node_vectors, not_visited, visited):
-    """! \brief Searches graph.
-    
-    Search the provided graph using depth first search, returns a bunch of lines.
-    \param Takes in hashmap representing graph.
-    \param Takes in a lookup for node_id to to node_vector.
-    \param Takes in a set representing not_visited nodes
-    \param Takes in an empty set representing nodes that have already been visited
-    
-    Returns: Lines, which is a bunch of lines we can plot
-    """
-    lines = []
-
-    def search(graph, node_vectors, current, previous, line):
-        neighbors = graph[current]
-        here = node_vectors[current]
-        branch = line
-        branch.append(here)
-
-        first_visit = current not in visited
-        end_of_line = (len(neighbors) == 1 and neighbors[0] == previous)
-
-        visited.add(current)
-        if current in not_visited:
-            not_visited.remove(current)
-
-        if not first_visit or end_of_line:
-            lines.append(branch)
-            return
-
-        for node in neighbors:
-            if node != previous:
-                search(graph, node_vectors, node, here, branch)
-                branch = [node_vectors[current]]
-
-    while len(not_visited) > 0:
-        start_node = not_visited.pop()
-        search(graph, node_vectors, start_node, None, [])
-
-    return lines
+        return xs, ys, zs, x, y, z
 
 
-def is_normal(x_axis, y_axis):
-    """! \brief Tests wether the given vectors are normal 
+    def is_normal(self, x_axis, y_axis):
+        """! \brief Tests wether the given vectors are normal 
 
-    Test the given vectors to find out if they are normal and ensures that the two axises are orthogonal
-    \param x and y axis
-    
-    Return: whether or not the axis are normal
-    """
-    normal = True
-    if x_axis.dot(y_axis) != 0:
-        normal = False
-    return normal
+        Test the given vectors to find out if they are normal and ensures that the two axises are orthogonal
+        \param x and y axis
 
-
-def plot_study3D(study, timestep=0, do_scatter=False):
-    """! \brief Plots the dislocation system in 3D at the given timestep.
-
-    Plots a given dislocation system with orthogonal axes.
-    \param study Self instance.
-    \param timestep The timestep to plot.
-    \param do_scatter Whether to plot dislocation nodes or not.
-    """
-
-    not_visited = set()
-    visited = set()
-    node_vectors = {}
-    node_vectors_2d = {}
-
-    #create the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited,
-                     node_vectors, node_vectors_2d)
-
-    #collect plotting informatoin
-    lines = dfs(g, node_vectors_2d, not_visited, visited)
-
-    xs = []
-    ys = []
-    zs = []
-    #organize plotting information and draw lines
-    xs, ys, zs = collect_data(lines)
-
-    #draw dots
-    if do_scatter:
-        scatter = ipv.scatter(xs, ys, zs)
-    ipv.show()
+        Return: whether or not the axis are normal
+        """
+        normal = True
+        if x_axis.dot(y_axis) != 0:
+            normal = False
+        return normal
 
 
-def plot_study(study, timestep=0, x_axis=(1, 0, 0), y_axis=(0, 1, 0)):
-    """! \brief Plots the dislocation system at the given timestep.
+    def plot_3D(self, timestep=0, do_scatter=False, color_scheme="tab10"):
+        """! \brief Plots the dislocation system in 3D at the given timestep.
 
-    Plots a given dislocation system with orthogonal axes.
-    \param study Self instance.
-    \param x_axis The x axis to project the system on.
-    \param y_axis The y axis to projec the system on.
-    \param timestep The timestep to plot.
-    """
-    x_axis = np.array(x_axis)
-    x_axis = x_axis / np.linalg.norm(x_axis)
-    y_axis = np.array(y_axis)
-    y_axis = y_axis / np.linalg.norm(y_axis)
+        Plots a given dislocation system with orthogonal axes.
+        \param study Self instance.
+        \param timestep The timestep to plot.
+        \param do_scatter Whether to plot dislocation nodes or not.
+        """
 
-    if is_normal(x_axis, y_axis) == False:
-        raise pd3.Pd3Exception("Provided axes are not normal.")
+        colors = []
+        lines = []
 
-    not_visited = set()
-    visited = set()
-    node_vectors = {}
-    node_vectors_2d = {}
+        #creating the graph
+#         proto_graph = study.export_protobuf()
+        g = Graph(self.protobuf, timestep, color_scheme)
 
-    #creating the graph
-    g = create_graph(study, timestep, x_axis, y_axis, not_visited,
-                     node_vectors, node_vectors_2d)
+        #collect the information to plot
+        g.dfs(lines, colors)
+        lines = np.array(lines)
 
-    #collect the information to plot
-    lines = dfs(g, node_vectors_2d, not_visited, visited)
+        #segmenting data for the plot
+        segments_list = []
+        fig = ipv.figure()
+        for line, color in zip(lines, colors):
+            xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
+            ipv.pylab.plot(x, y, z, color=color)
 
-    #Plots lines
-    lc = mc.LineCollection(lines)
-    fig, ax = pl.subplots()
-    ax.add_collection(lc)
-    ax.autoscale()
-    ax.margins(0.1)
-    plt.title("Plot Study")
-    plt.xlabel("x")
-    plt.ylabel("y")
+        #draw dots
+        if do_scatter:
+            scatter = ipv.scatter(xs, ys, zs)
+        ipv.show()
+
+
+    def plot_2D(self, timestep=0, x_axis=(1, 0, 0), y_axis=(0, 1, 0), color_scheme="tab10"):
+        """! \brief Plots the dislocation system at the given timestep.
+
+        Plots a given dislocation system with orthogonal axes.
+        \param study Self instance.
+        \param x_axis The x axis to project the system on.
+        \param y_axis The y axis to projec the system on.
+        \param timestep The timestep to plot.
+        """
+        x_axis = np.array(x_axis)
+        x_axis = x_axis / np.linalg.norm(x_axis)
+        y_axis = np.array(y_axis)
+        y_axis = y_axis / np.linalg.norm(y_axis)
+
+        if self.is_normal(x_axis, y_axis) == False:
+            raise pd3.Pd3Exception("Provided axes are not normal.")
+
+        color = []
+        lines = []
+        #creating the graph
+#         proto_graph = study.export_protobuf()
+        g = Graph(self.protobuf, timestep, color_scheme)
+
+        #collect the information to plot
+        g.dfs(lines, color)
+        lines = np.array(lines)
+
+        #segmenting data for the plot
+        segments_list = []
+        for line in lines:
+            xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
+            segments = list(zip(xs, ys))
+            segments_list.append(segments)
+
+        #Plot
+        line_segments = LineCollection(segments_list,
+                                       colors=color,
+                                       linestyle='solid')
+        fig, ax = pl.subplots()
+        ax.add_collection(line_segments)
+        ax.autoscale()
+        ax.margins(0.1)
+        plt.title("Plot Study")
+        plt.xlabel("x")
+        plt.ylabel("y")
+
