@@ -76,8 +76,11 @@ class Graph:
             num = num + 1
 #         color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
-        def search(current, previous, line, previous_slip, color):
-
+        def search(current, previous, line, previous_slip, color, first_iteration):
+            
+            if len(self.visited) == 0:
+                first_iteration = True
+                
             neighbors = self.graph_data[current]
 
             here = self.node_vectors[current]
@@ -97,21 +100,22 @@ class Graph:
                 color.append(color_lookup[previous_slip])
                 return
 
-            first_iteration = True
             for node in neighbors:
                 slip = self.links[current][node]
                 if slip != previous_slip:
                     if first_iteration:
                         lines.append(branch)
                         color.append(color_lookup[slip])
+                        search(node, current, branch, slip, color, False)
                     branch = [here]
 
                 if node != previous:
-                    search(node, current, branch, slip, color)
+                    lines.append(branch)
+                    color.append(color_lookup[slip])
+                    search(node, current, branch, slip, color, False)
                     branch = [here]
-                first_iteration = False
 
         while len(self.not_visited) > 0:
             start_node = self.not_visited.pop()
-            search(start_node, None, [], None, color)
+            search(start_node, None, [], None, color, False)
         return lines, color

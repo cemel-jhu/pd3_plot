@@ -9,9 +9,9 @@ from matplotlib import collections as mc
 import seaborn as sns
 import pylab as pl
 import importlib
-import Graph_class
-importlib.reload(Graph_class)
-from Graph_class import Graph
+import Graph
+importlib.reload(Graph)
+from Graph import Graph
 
 
 class Plotter:
