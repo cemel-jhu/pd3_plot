@@ -14,7 +14,7 @@ import seaborn as sns
 
 class Graph:
     # constructor
-    def __init__(self, proto_graph, timestep, color_scheme):
+    def __init__(self, proto_graph, timestep, color_scheme, num_colors):
         #set the instance variables
         self.proto_graph = proto_graph
         self.timestep = timestep
@@ -24,6 +24,7 @@ class Graph:
         self.graph_data = {}
         self.node_vectors = {}
         self.color_scheme = color_scheme
+        self.num_colors = num_colors
 
         graph = self.proto_graph
         vertices = graph.state[self.timestep].nodes
@@ -68,10 +69,11 @@ class Graph:
 
         Returns: Lines, which is a bunch of lines we can plot
             """
+
         sns.set()
         num = 0
         color_lookup = {}
-        for colors in sns.color_palette(self.color_scheme, 13):
+        for colors in sns.color_palette(self.color_scheme, self.num_colors):
             color_lookup.update({num: colors})
             num = num + 1
 #         color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
@@ -80,7 +82,7 @@ class Graph:
             
             if len(self.visited) == 0:
                 first_iteration = True
-                
+            
             neighbors = self.graph_data[current]
 
             here = self.node_vectors[current]

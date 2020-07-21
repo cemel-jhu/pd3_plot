@@ -66,21 +66,20 @@ class Plotter:
             normal = False
         return normal
 
-    def plot_3D(self, timestep=0, do_scatter=False, color_scheme="tab10"):
+    def plot_3D(self, timestep=0, do_scatter=False, color_scheme="tab10", num_colors =13):
         """! \brief Plots the dislocation system in 3D at the given timestep.
 
-        Plots a given dislocation system with orthogonal axes.
-        \param study Self instance.
         \param timestep The timestep to plot.
         \param do_scatter Whether to plot dislocation nodes or not.
+        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+
         """
 
         colors = []
         lines = []
 
         #creating the graph
-        #         proto_graph = study.export_protobuf()
-        g = Graph(self.protobuf, timestep, color_scheme)
+        g = Graph(self.protobuf, timestep, color_scheme, num_colors)
 
         #collect the information to plot
         g.dfs(lines, colors)
@@ -91,25 +90,26 @@ class Plotter:
         fig = ipv.figure()
         for line, color in zip(lines, colors):
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-            ipv.pylab.plot(x, y, z, color=color)
+            s = ipv.pylab.plot(x, y, z, color=color)
+
 
         #draw dots
-        if do_scatter:
-            scatter = ipv.scatter(xs, ys, zs)
+            if do_scatter:
+                scatter = ipv.scatter(xs, ys, zs)
         ipv.show()
 
     def plot_2D(self,
                 timestep=0,
                 x_axis=(1, 0, 0),
                 y_axis=(0, 1, 0),
-                color_scheme="tab10"):
+                color_scheme="tab10", num_colors =13):
         """! \brief Plots the dislocation system at the given timestep.
 
         Plots a given dislocation system with orthogonal axes.
-        \param study Self instance.
         \param x_axis The x axis to project the system on.
         \param y_axis The y axis to projec the system on.
         \param timestep The timestep to plot.
+        \param color_scheme The color_scheme that the user wants the lines to be colored with 
         """
         x_axis = np.array(x_axis)
         x_axis = x_axis / np.linalg.norm(x_axis)
@@ -122,8 +122,7 @@ class Plotter:
         color = []
         lines = []
         #creating the graph
-        #         proto_graph = study.export_protobuf()
-        g = Graph(self.protobuf, timestep, color_scheme)
+        g = Graph(self.protobuf, timestep, color_scheme, num_colors)
 
         #collect the information to plot
         g.dfs(lines, color)
@@ -147,3 +146,97 @@ class Plotter:
         plt.title("Plot Study")
         plt.xlabel("x")
         plt.ylabel("y")
+
+        
+    def movie_3D(self, timestep_start=0, timestep_end=42, step=10, do_scatter=False, color_scheme="tab10", num_colors = 20):
+        """! \brief Plots the dislocation system in 3D over a small period of time.
+
+        \param timestep_start The start time for plotting the dislocations
+        \param timestep_end The end time for plotting dislocations
+        \param step The interval of how often the dislocations are plotted over the specified period of time
+        \param do_scatter Whether to plot dislocation nodes or not.
+        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+
+        """
+        times = []
+        while timestep_start < timestep_end:
+            times.append(timestep_start)
+            timestep_start = timestep_start + step
+     
+
+        #creating the graph
+        for time in times:
+            timestep = time
+            colors = []
+            lines = []
+            g = Graph(self.protobuf, timestep, color_scheme, num_colors)
+
+            #collect the information to plot
+            g.dfs(lines, colors)
+            lines = np.array(lines)
+
+            #segmenting data for the plot
+            segments_list = []
+            fig = ipv.figure()
+            for line, color in zip(lines, colors):
+                xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
+                ipv.pylab.plot(x, y, z, color=color)
+            #draw dots
+            if do_scatter:
+                scatter = ipv.scatter(xs, ys, zs)
+            ipv.show()
+            
+    def movie_2D(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), timestep_start=0, timestep_end=42, step=10, do_scatter=False, color_scheme="tab10", num_colors = 20):
+        
+        """! \brief Plots the dislocation system at the given timestep.
+
+        Plots a given dislocation system with orthogonal axes.
+        \param x_axis The x axis to project the system on.
+        \param y_axis The y axis to projec the system on.
+        \param timestep The timestep to plot.
+        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        """
+        x_axis = np.array(x_axis)
+        x_axis = x_axis / np.linalg.norm(x_axis)
+        y_axis = np.array(y_axis)
+        y_axis = y_axis / np.linalg.norm(y_axis)
+
+        if self.is_normal(x_axis, y_axis) == False:
+            raise pd3.Pd3Exception("Provided axes are not normal.")
+
+        times = []
+        while timestep_start < timestep_end:
+            times.append(timestep_start)
+            timestep_start = timestep_start + step
+     
+
+        #creating the graph
+        for time in times:
+            timestep = time
+            color = []
+            lines = []
+            g = Graph(self.protobuf, timestep, color_scheme, num_colors)
+
+            #collect the information to plot
+            g.dfs(lines, color)
+            lines = np.array(lines)
+
+
+            #segmenting data for the plot
+            segments_list = []
+            for line in lines:
+                xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
+                segments = list(zip(xs, ys))
+                segments_list.append(segments)
+
+            #Plot
+            line_segments = LineCollection(segments_list,
+                                           colors=color,
+                                           linestyle='solid')
+            fig, ax = pl.subplots()
+            ax.add_collection(line_segments)
+            ax.autoscale()
+            ax.margins(0.1)
+            plt.title("Plot Study")
+            plt.xlabel("x")
+            plt.ylabel("y")
