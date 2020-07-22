@@ -76,13 +76,16 @@ class Graph:
         for colors in sns.color_palette(self.color_scheme, self.num_colors):
             color_lookup.update({num: colors})
             num = num + 1
+
+
 #         color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
-        def search(current, previous, line, previous_slip, color, first_iteration):
-            
+        def search(current, previous, line, previous_slip, color,
+                   first_iteration):
+
             if len(self.visited) == 0:
                 first_iteration = True
-            
+
             neighbors = self.graph_data[current]
 
             here = self.node_vectors[current]

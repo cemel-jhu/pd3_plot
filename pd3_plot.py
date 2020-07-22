@@ -66,7 +66,11 @@ class Plotter:
             normal = False
         return normal
 
-    def plot_3D(self, timestep=0, do_scatter=False, color_scheme="tab10", num_colors =13):
+    def plot_3D(self,
+                timestep=0,
+                do_scatter=False,
+                color_scheme="tab10",
+                num_colors=13):
         """! \brief Plots the dislocation system in 3D at the given timestep.
 
         \param timestep The timestep to plot.
@@ -90,19 +94,19 @@ class Plotter:
         fig = ipv.figure()
         for line, color in zip(lines, colors):
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-            s = ipv.pylab.plot(x, y, z, color=color)
-
+            ipv.pylab.plot(x, y, z, color=color)
 
         #draw dots
-            if do_scatter:
-                scatter = ipv.scatter(xs, ys, zs)
+        if do_scatter:
+            scatter = ipv.scatter(xs, ys, zs)
         ipv.show()
 
     def plot_2D(self,
                 timestep=0,
                 x_axis=(1, 0, 0),
                 y_axis=(0, 1, 0),
-                color_scheme="tab10", num_colors =13):
+                color_scheme="tab10",
+                num_colors=13):
         """! \brief Plots the dislocation system at the given timestep.
 
         Plots a given dislocation system with orthogonal axes.
@@ -147,8 +151,13 @@ class Plotter:
         plt.xlabel("x")
         plt.ylabel("y")
 
-        
-    def movie_3D(self, timestep_start=0, timestep_end=42, step=10, do_scatter=False, color_scheme="tab10", num_colors = 20):
+    def movie_3D(self,
+                 timestep_start=0,
+                 timestep_end=42,
+                 step=10,
+                 do_scatter=False,
+                 color_scheme="tab10",
+                 num_colors=20):
         """! \brief Plots the dislocation system in 3D over a small period of time.
 
         \param timestep_start The start time for plotting the dislocations
@@ -162,7 +171,6 @@ class Plotter:
         while timestep_start < timestep_end:
             times.append(timestep_start)
             timestep_start = timestep_start + step
-     
 
         #creating the graph
         for time in times:
@@ -185,9 +193,16 @@ class Plotter:
             if do_scatter:
                 scatter = ipv.scatter(xs, ys, zs)
             ipv.show()
-            
-    def movie_2D(self, x_axis=(1, 0, 0), y_axis=(0, 1, 0), timestep_start=0, timestep_end=42, step=10, do_scatter=False, color_scheme="tab10", num_colors = 20):
-        
+
+    def movie_2D(self,
+                 x_axis=(1, 0, 0),
+                 y_axis=(0, 1, 0),
+                 timestep_start=0,
+                 timestep_end=42,
+                 step=10,
+                 do_scatter=False,
+                 color_scheme="tab10",
+                 num_colors=20):
         """! \brief Plots the dislocation system at the given timestep.
 
         Plots a given dislocation system with orthogonal axes.
@@ -208,7 +223,6 @@ class Plotter:
         while timestep_start < timestep_end:
             times.append(timestep_start)
             timestep_start = timestep_start + step
-     
 
         #creating the graph
         for time in times:
@@ -220,7 +234,6 @@ class Plotter:
             #collect the information to plot
             g.dfs(lines, color)
             lines = np.array(lines)
-
 
             #segmenting data for the plot
             segments_list = []
