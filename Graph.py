@@ -102,7 +102,7 @@ class Graph:
 
             if not first_visit or end_of_line:
                 lines.append(branch)
-                color.append(color_lookup[previous_slip])
+                color.append(color_lookup[previous_slip % self.num_colors])
                 return
 
             for node in neighbors:
@@ -110,13 +110,13 @@ class Graph:
                 if slip != previous_slip:
                     if first_iteration:
                         lines.append(branch)
-                        color.append(color_lookup[slip])
+                        color.append(color_lookup[slip % self.num_colors])
                         search(node, current, branch, slip, color, False)
                     branch = [here]
 
                 if node != previous:
                     lines.append(branch)
-                    color.append(color_lookup[slip])
+                    color.append(color_lookup[slip % self.num_colors])
                     search(node, current, branch, slip, color, False)
                     branch = [here]
 

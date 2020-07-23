@@ -94,7 +94,7 @@ class Plotter:
         fig = ipv.figure()
         for line, color in zip(lines, colors):
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-            ipv.pylab.plot(x, y, z, color=color)
+            ipv.pylab.plot(x, y, z, color=color, size=5, connected=True, visible_markers=True, marker = 'diamond')
 
         #draw dots
         if do_scatter:
@@ -115,6 +115,10 @@ class Plotter:
         \param timestep The timestep to plot.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
         """
+        
+        self.normalize(*x_axis)
+        self.normalize(*y_axis)
+        
         x_axis = np.array(x_axis)
         x_axis = x_axis / np.linalg.norm(x_axis)
         y_axis = np.array(y_axis)
@@ -142,7 +146,7 @@ class Plotter:
         #Plot
         line_segments = LineCollection(segments_list,
                                        colors=color,
-                                       linestyle='solid')
+                                       linestyle='solid', linewidth = 1.5)
         fig, ax = pl.subplots()
         ax.add_collection(line_segments)
         ax.autoscale()
@@ -157,7 +161,7 @@ class Plotter:
                  step=10,
                  do_scatter=False,
                  color_scheme="tab10",
-                 num_colors=20):
+                 num_colors=13):
         """! \brief Plots the dislocation system in 3D over a small period of time.
 
         \param timestep_start The start time for plotting the dislocations
@@ -166,12 +170,21 @@ class Plotter:
         \param do_scatter Whether to plot dislocation nodes or not.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
 
-        """
+        """ 
+#         s = []
+#         for t in range(timestep):
+#             ...
+#             for line, color in zip(lines, colors):
+#                 s.append(ipv.pylab.plot(x, y, z, color=color))
+#         ipv.animation_control(s)
+        
+        
+        s = []
         times = []
         while timestep_start < timestep_end:
             times.append(timestep_start)
             timestep_start = timestep_start + step
-
+       
         #creating the graph
         for time in times:
             timestep = time
@@ -182,17 +195,20 @@ class Plotter:
             #collect the information to plot
             g.dfs(lines, colors)
             lines = np.array(lines)
-
+            
             #segmenting data for the plot
             segments_list = []
             fig = ipv.figure()
             for line, color in zip(lines, colors):
                 xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-                ipv.pylab.plot(x, y, z, color=color)
-            #draw dots
-            if do_scatter:
-                scatter = ipv.scatter(xs, ys, zs)
-            ipv.show()
+                ipv.pylab.plot(xs, ys, zs, color = color, size=2, connected=True, visible_markers=True)
+        s.append(fig.scatters)
+        print(len(s))
+        ipv.animation_control(s, sequence_length=len(s))
+        ipv.show()
+        if do_scatter:
+            scatter = ipv.scatter(xs, ys, zs)
+#         ipv.show()
 
     def movie_2D(self,
                  x_axis=(1, 0, 0),
@@ -202,7 +218,7 @@ class Plotter:
                  step=10,
                  do_scatter=False,
                  color_scheme="tab10",
-                 num_colors=20):
+                 num_colors=13):
         """! \brief Plots the dislocation system at the given timestep.
 
         Plots a given dislocation system with orthogonal axes.
@@ -211,6 +227,9 @@ class Plotter:
         \param timestep The timestep to plot.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
         """
+        self.normalize(*x_axis)
+        self.normalize(*y_axis)
+        
         x_axis = np.array(x_axis)
         x_axis = x_axis / np.linalg.norm(x_axis)
         y_axis = np.array(y_axis)
