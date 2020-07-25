@@ -171,32 +171,108 @@ class Plotter:
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
 
         """ 
+        s = []
+#         ipv.pylab.figure()
         times = []
         while timestep_start < timestep_end:
             times.append(timestep_start)
             timestep_start = timestep_start + step
+        print("Timestep 1")
+        turn = 0
+        x = []
+        y = []
+        z = []
+        xs = []
+        ys = []
+        zs = []
+#         fig = []
+        lines = []
+        colors = []
+        time = times[0]
+        #timestep loop
+        fig = ipv.pylab.figure(key = 1)
+        ipv.pylab.figure(key = 1)
+        x.append(float("nan"))
+        y.append(float("nan"))
+        z.append(float("nan"))
 
-        #creating the graph
-        for time in times:
-            timestep = time
-            colors = []
-            lines = []
-            g = Graph(self.protobuf, timestep, color_scheme, num_colors)
+        g = Graph(self.protobuf, time, color_scheme, num_colors)
 
-            #collect the information to plot
-            g.dfs(lines, colors)
-            lines = np.array(lines)
+        #collect the information to plot
+        g.dfs(lines, colors)
+#             lines = np.array(lines)
 
-            #segmenting data for the plot
-            segments_list = []
-            fig = ipv.figure()
-            for line, color in zip(lines, colors):
-                xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-                ipv.pylab.plot(x, y, z, color=color)
-            #draw dots
-            if do_scatter:
-                scatter = ipv.scatter(xs, ys, zs)
-            ipv.show()
+        #segmenting data for the plot
+        segments_list = []
+
+#             lines = np.array(lines)
+#             print(lines)
+        for array in lines:
+
+            for line in array:
+#                     print (line)
+                x.append(line[0])
+                y.append(line[1])
+                z.append(line[2]) 
+            x.append(float("nan"))
+            y.append(float("nan"))
+            z.append(float("nan"))
+        xs = np.array(x)
+        ys = np.array(y)
+        zs = np.array(z)
+        ipv.scatter(xs, ys, zs, marker='sphere', size=0, connected=True)
+        
+#         print("Timestep 2")
+#         time = times[1]
+#         #second turn
+#         turn2 = 0
+        
+# #         time = time + step
+#         x2 = []
+#         y2 = []
+#         z2 = []
+#         xs2 = []
+#         ys2 = []
+#         zs2 = []
+#         s2 = []
+# #         lines2 = []
+# #         colors2= []
+#         #second time step loop
+# #         fig2 = ipv.pylab.figure(key = time)
+#         ipv.pylab.figure(key = 1)
+#         x2.append(float("nan"))
+#         y2.append(float("nan"))
+#         z2.append(float("nan"))
+
+#         g = Graph(self.protobuf, time, color_scheme, num_colors)
+
+#         #collect the information to plot
+#         g.dfs(lines, colors)
+# #             lines = np.array(lines)
+
+#         #segmenting data for the plot
+# #         segments_list = []
+
+# #             lines = np.array(lines)
+# #             print(lines)
+#         for array in lines:
+
+#             for line in array:
+# #                     print (line)
+#                 x2.append(line[0])
+#                 y2.append(line[1])
+#                 z2.append(line[2]) 
+#             x2.append(float("nan"))
+#             y2.append(float("nan"))
+#             z2.append(float("nan"))
+#         xs2 = np.array(x2)
+#         ys2 = np.array(y2)
+#         zs2 = np.array(z2)
+#         ipv.scatter(xs2, ys2, zs2, marker='sphere', size=0, connected=True)
+
+#         ipv.animation_control(fig.scatters, sequence_length = 200, interval = 1000)
+        print("Show")
+        ipv.show()
 
     def movie_2D(self,
                  x_axis=(1, 0, 0),
