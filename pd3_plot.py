@@ -12,7 +12,7 @@ import importlib
 import Graph
 importlib.reload(Graph)
 from Graph import Graph
-
+import os, sys
 
 class Plotter:
     # constructor
@@ -54,7 +54,7 @@ class Plotter:
         return xs, ys, zs, x, y, z
 
     def is_normal(self, x_axis, y_axis):
-        """! \brief Tests wether the given vectors are normal 
+        """! \brief Tests whether the given vectors are normal 
 
         Test the given vectors to find out if they are normal and ensures that the two axises are orthogonal
         \param x and y axis
@@ -99,7 +99,7 @@ class Plotter:
         #draw dots
         if do_scatter:
             scatter = ipv.scatter(xs, ys, zs)
-        ipv.show()
+            ipv.show()
 
     def plot_2D(self,
                 timestep=0,
@@ -135,14 +135,17 @@ class Plotter:
         #collect the information to plot
         g.dfs(lines, color)
         lines = np.array(lines)
-
+        
         #segmenting data for the plot
         segments_list = []
         for line in lines:
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-            segments = list(zip(xs, ys))
+            points = list(zip(xs, ys, zs))
+            segments_x = np.dot(points, x_axis)
+            segments_y = np.dot(points, y_axis)
+            segments = list(zip(segments_x, segments_y))
             segments_list.append(segments)
-
+        
         #Plot
         line_segments = LineCollection(segments_list,
                                        colors=color,
@@ -196,8 +199,12 @@ class Plotter:
             #draw dots
             if do_scatter:
                 scatter = ipv.scatter(xs, ys, zs)
-            ipv.show()
 
+            ipv.show()
+#             ipv.pylab.screenshot(timeout_seconds = 3600)
+        link = ipv.save("pd3_plot_VR.html")
+        return link
+        
     def movie_2D(self,
                  x_axis=(1, 0, 0),
                  y_axis=(0, 1, 0),
@@ -261,3 +268,6 @@ class Plotter:
             plt.title("Plot Study")
             plt.xlabel("x")
             plt.ylabel("y")
+    
+    def vr_link(self):
+        print("Here is the link to view the model in VR: " + "\n" + "http://10.160.48.168:8000/user/reap2020/view/notebooks/pd3_plot_VR.html")
