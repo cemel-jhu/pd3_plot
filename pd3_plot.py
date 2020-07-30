@@ -270,4 +270,5 @@ class Plotter:
             plt.ylabel("y")
     
     def vr_link(self):
+        self.movie_3D
         print("Here is the link to view the model in VR: " + "\n" + "http://10.160.48.168:8000/user/reap2020/view/notebooks/pd3_plot_VR.html")
