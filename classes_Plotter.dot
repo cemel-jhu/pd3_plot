@@ -1,0 +1,5 @@
+digraph "classes_Plotter" {
+charset="utf-8"
+rankdir=BT
+"0" [label="pd3_plot.Plotter", shape="record"];
+}

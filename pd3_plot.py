@@ -14,8 +14,8 @@ importlib.reload(Graph)
 from Graph import Graph
 import os, sys
 
+
 class Plotter:
-    # constructor
     def __init__(self, protobuf):
         self.protobuf = protobuf
 
@@ -25,7 +25,7 @@ class Plotter:
         return vector / np.linalg.norm(vector)
 
     def convert_line_to_coordinates(self, line):
-        """! \brief Converts data in line into x,y,z coordinates
+        """! \brief Converts data in line into x, y, z coordinates
 
         Goes through the line array and collects the x, y, and z values needed to plot the line segments
         \param Takes in an array of node information (x, y, z)
@@ -70,36 +70,50 @@ class Plotter:
                 timestep=0,
                 do_scatter=False,
                 color_scheme="tab10",
-                num_colors=13):
+                num_colors=13,
+                do_vr=False):
         """! \brief Plots the dislocation system in 3D at the given timestep.
-
-        \param timestep The timestep to plot.
-        \param do_scatter Whether to plot dislocation nodes or not.
+        
+        \param timestep The timestep to plot
+        \param do_scatter Whether to plot dislocation nodes or not
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param num_colors The number of colors in the given color_scheme
+        \param do_vr Whether to save the link for using VR or not
 
         """
 
         colors = []
         lines = []
 
-        #creating the graph
+        # Creating the graph
         g = Graph(self.protobuf, timestep, color_scheme, num_colors)
 
-        #collect the information to plot
+        # Collect the information to plot
         g.dfs(lines, colors)
         lines = np.array(lines)
 
-        #segmenting data for the plot
-        segments_list = []
+        # Segmenting data for the plot
         fig = ipv.figure()
         for line, color in zip(lines, colors):
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-            ipv.pylab.plot(x, y, z, color=color, size=5, connected=True, visible_markers=True, marker = 'diamond')
+            ipv.pylab.plot(x,
+                           y,
+                           z,
+                           color=color,
+                           size=5,
+                           connected=True,
+                           visible_markers=True,
+                           marker='diamond')
 
-        #draw dots
+        # Draw dots
         if do_scatter:
             scatter = ipv.scatter(xs, ys, zs)
-            ipv.show()
+
+        # Save the figure for VR
+        if do_vr:
+            ipv.save("pd3_plot_VR.html")
+
+        ipv.show()
 
     def plot_2D(self,
                 timestep=0,
@@ -110,33 +124,29 @@ class Plotter:
         """! \brief Plots the dislocation system at the given timestep.
 
         Plots a given dislocation system with orthogonal axes.
+        \param timestep The timestep to plot.
         \param x_axis The x axis to project the system on.
         \param y_axis The y axis to projec the system on.
-        \param timestep The timestep to plot.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
         """
-        
-        self.normalize(*x_axis)
-        self.normalize(*y_axis)
-        
-        x_axis = np.array(x_axis)
-        x_axis = x_axis / np.linalg.norm(x_axis)
-        y_axis = np.array(y_axis)
-        y_axis = y_axis / np.linalg.norm(y_axis)
+
+        x_axis = self.normalize(*x_axis)
+        y_axis = self.normalize(*y_axis)
 
         if self.is_normal(x_axis, y_axis) == False:
             raise pd3.Pd3Exception("Provided axes are not normal.")
 
         color = []
         lines = []
-        #creating the graph
+
+        # Creating the graph
         g = Graph(self.protobuf, timestep, color_scheme, num_colors)
 
-        #collect the information to plot
+        # Collect the information to plot
         g.dfs(lines, color)
         lines = np.array(lines)
-        
-        #segmenting data for the plot
+
+        # Segmenting data for the plot
         segments_list = []
         for line in lines:
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
@@ -145,11 +155,12 @@ class Plotter:
             segments_y = np.dot(points, y_axis)
             segments = list(zip(segments_x, segments_y))
             segments_list.append(segments)
-        
-        #Plot
+
+        # Plot
         line_segments = LineCollection(segments_list,
                                        colors=color,
-                                       linestyle='solid', linewidth = 1.5)
+                                       linestyle='solid',
+                                       linewidth=1.5)
         fig, ax = pl.subplots()
         ax.add_collection(line_segments)
         ax.autoscale()
@@ -172,39 +183,37 @@ class Plotter:
         \param step The interval of how often the dislocations are plotted over the specified period of time
         \param do_scatter Whether to plot dislocation nodes or not.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param num_colors The number of colors in the color_scheme
 
-        """ 
+        """
         times = []
         while timestep_start < timestep_end:
             times.append(timestep_start)
             timestep_start = timestep_start + step
 
-        #creating the graph
+        # Creating the graph
         for time in times:
             timestep = time
             colors = []
             lines = []
             g = Graph(self.protobuf, timestep, color_scheme, num_colors)
 
-            #collect the information to plot
+            # Collect the information to plot
             g.dfs(lines, colors)
             lines = np.array(lines)
 
-            #segmenting data for the plot
+            # Segmenting data for the plot
             segments_list = []
             fig = ipv.figure()
             for line, color in zip(lines, colors):
                 xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
                 ipv.pylab.plot(x, y, z, color=color)
-            #draw dots
+
+            # Draw dots
             if do_scatter:
                 scatter = ipv.scatter(xs, ys, zs)
-
             ipv.show()
-#             ipv.pylab.screenshot(timeout_seconds = 3600)
-        link = ipv.save("pd3_plot_VR.html")
-        return link
-        
+
     def movie_2D(self,
                  x_axis=(1, 0, 0),
                  y_axis=(0, 1, 0),
@@ -219,16 +228,15 @@ class Plotter:
         Plots a given dislocation system with orthogonal axes.
         \param x_axis The x axis to project the system on.
         \param y_axis The y axis to projec the system on.
-        \param timestep The timestep to plot.
+        \param timestep_start The start time for plotting the dislocations
+        \param timestep_end The end time for plotting dislocations
+        \param step The interval of how often the dislocations are plotted over the specified period of time
+        \param do_scatter Whether to plot dislocation nodes or not.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param num_colors The number of colors in the color_scheme
         """
-        self.normalize(*x_axis)
-        self.normalize(*y_axis)
-        
-        x_axis = np.array(x_axis)
-        x_axis = x_axis / np.linalg.norm(x_axis)
-        y_axis = np.array(y_axis)
-        y_axis = y_axis / np.linalg.norm(y_axis)
+        x_axis = self.normalize(*x_axis)
+        y_axis = self.normalize(*y_axis)
 
         if self.is_normal(x_axis, y_axis) == False:
             raise pd3.Pd3Exception("Provided axes are not normal.")
@@ -238,26 +246,25 @@ class Plotter:
             times.append(timestep_start)
             timestep_start = timestep_start + step
 
-        #creating the graph
-        
+        # Ceating the graph
         for time in times:
             timestep = time
             color = []
             lines = []
             g = Graph(self.protobuf, timestep, color_scheme, num_colors)
 
-            #collect the information to plot
+            # Collect the information to plot
             g.dfs(lines, color)
             lines = np.array(lines)
 
-            #segmenting data for the plot
+            # Segmenting data for the plot
             segments_list = []
             for line in lines:
                 xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
                 segments = list(zip(xs, ys))
                 segments_list.append(segments)
 
-            #Plot
+            # Plot
             line_segments = LineCollection(segments_list,
                                            colors=color,
                                            linestyle='solid')
@@ -268,7 +275,11 @@ class Plotter:
             plt.title("Plot Study")
             plt.xlabel("x")
             plt.ylabel("y")
-    
-    def vr_link(self):
-        self.movie_3D
-        print("Here is the link to view the model in VR: " + "\n" + "http://10.160.48.168:8000/user/reap2020/view/notebooks/pd3_plot_VR.html")
+
+    def vr_link(self, *args, **kwargs):
+        kwargs["do_vr"] = True
+        self.plot_3D(*args, **kwargs)
+        print(
+            "Here is the link to view the model in VR: " + "\n" +
+            "http://10.160.48.168:8000/user/reap2020/view/notebooks/pd3_plot_VR.html"
+        )

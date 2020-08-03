@@ -94,7 +94,14 @@ class Plotter:
         fig = ipv.figure()
         for line, color in zip(lines, colors):
             xs, ys, zs, x, y, z = self.convert_line_to_coordinates(line)
-            ipv.pylab.plot(x, y, z, color=color, size=5, connected=True, visible_markers=True, marker = 'diamond')
+            ipv.pylab.plot(x,
+                           y,
+                           z,
+                           color=color,
+                           size=5,
+                           connected=True,
+                           visible_markers=True,
+                           marker='diamond')
 
         #draw dots
         if do_scatter:
@@ -115,10 +122,10 @@ class Plotter:
         \param timestep The timestep to plot.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
         """
-        
+
         self.normalize(*x_axis)
         self.normalize(*y_axis)
-        
+
         x_axis = np.array(x_axis)
         x_axis = x_axis / np.linalg.norm(x_axis)
         y_axis = np.array(y_axis)
@@ -146,7 +153,8 @@ class Plotter:
         #Plot
         line_segments = LineCollection(segments_list,
                                        colors=color,
-                                       linestyle='solid', linewidth = 1.5)
+                                       linestyle='solid',
+                                       linewidth=1.5)
         fig, ax = pl.subplots()
         ax.add_collection(line_segments)
         ax.autoscale()
@@ -170,9 +178,9 @@ class Plotter:
         \param do_scatter Whether to plot dislocation nodes or not.
         \param color_scheme The color_scheme that the user wants the lines to be colored with 
 
-        """ 
+        """
         s = []
-#         ipv.pylab.figure()
+        #         ipv.pylab.figure()
         times = []
         while timestep_start < timestep_end:
             times.append(timestep_start)
@@ -185,13 +193,13 @@ class Plotter:
         xs = []
         ys = []
         zs = []
-#         fig = []
+        #         fig = []
         lines = []
         colors = []
         time = times[0]
         #timestep loop
-        fig = ipv.pylab.figure(key = 1)
-        ipv.pylab.figure(key = 1)
+        fig = ipv.pylab.figure(key=1)
+        ipv.pylab.figure(key=1)
         x.append(float("nan"))
         y.append(float("nan"))
         z.append(float("nan"))
@@ -200,20 +208,20 @@ class Plotter:
 
         #collect the information to plot
         g.dfs(lines, colors)
-#             lines = np.array(lines)
+        #             lines = np.array(lines)
 
         #segmenting data for the plot
         segments_list = []
 
-#             lines = np.array(lines)
-#             print(lines)
+        #             lines = np.array(lines)
+        #             print(lines)
         for array in lines:
 
             for line in array:
-#                     print (line)
+                #                     print (line)
                 x.append(line[0])
                 y.append(line[1])
-                z.append(line[2]) 
+                z.append(line[2])
             x.append(float("nan"))
             y.append(float("nan"))
             z.append(float("nan"))
@@ -221,56 +229,56 @@ class Plotter:
         ys = np.array(y)
         zs = np.array(z)
         ipv.scatter(xs, ys, zs, marker='sphere', size=0, connected=True)
-        
-#         print("Timestep 2")
-#         time = times[1]
-#         #second turn
-#         turn2 = 0
-        
-# #         time = time + step
-#         x2 = []
-#         y2 = []
-#         z2 = []
-#         xs2 = []
-#         ys2 = []
-#         zs2 = []
-#         s2 = []
-# #         lines2 = []
-# #         colors2= []
-#         #second time step loop
-# #         fig2 = ipv.pylab.figure(key = time)
-#         ipv.pylab.figure(key = 1)
-#         x2.append(float("nan"))
-#         y2.append(float("nan"))
-#         z2.append(float("nan"))
 
-#         g = Graph(self.protobuf, time, color_scheme, num_colors)
+        #         print("Timestep 2")
+        #         time = times[1]
+        #         #second turn
+        #         turn2 = 0
 
-#         #collect the information to plot
-#         g.dfs(lines, colors)
-# #             lines = np.array(lines)
+        # #         time = time + step
+        #         x2 = []
+        #         y2 = []
+        #         z2 = []
+        #         xs2 = []
+        #         ys2 = []
+        #         zs2 = []
+        #         s2 = []
+        # #         lines2 = []
+        # #         colors2= []
+        #         #second time step loop
+        # #         fig2 = ipv.pylab.figure(key = time)
+        #         ipv.pylab.figure(key = 1)
+        #         x2.append(float("nan"))
+        #         y2.append(float("nan"))
+        #         z2.append(float("nan"))
 
-#         #segmenting data for the plot
-# #         segments_list = []
+        #         g = Graph(self.protobuf, time, color_scheme, num_colors)
 
-# #             lines = np.array(lines)
-# #             print(lines)
-#         for array in lines:
+        #         #collect the information to plot
+        #         g.dfs(lines, colors)
+        # #             lines = np.array(lines)
 
-#             for line in array:
-# #                     print (line)
-#                 x2.append(line[0])
-#                 y2.append(line[1])
-#                 z2.append(line[2]) 
-#             x2.append(float("nan"))
-#             y2.append(float("nan"))
-#             z2.append(float("nan"))
-#         xs2 = np.array(x2)
-#         ys2 = np.array(y2)
-#         zs2 = np.array(z2)
-#         ipv.scatter(xs2, ys2, zs2, marker='sphere', size=0, connected=True)
+        #         #segmenting data for the plot
+        # #         segments_list = []
 
-#         ipv.animation_control(fig.scatters, sequence_length = 200, interval = 1000)
+        # #             lines = np.array(lines)
+        # #             print(lines)
+        #         for array in lines:
+
+        #             for line in array:
+        # #                     print (line)
+        #                 x2.append(line[0])
+        #                 y2.append(line[1])
+        #                 z2.append(line[2])
+        #             x2.append(float("nan"))
+        #             y2.append(float("nan"))
+        #             z2.append(float("nan"))
+        #         xs2 = np.array(x2)
+        #         ys2 = np.array(y2)
+        #         zs2 = np.array(z2)
+        #         ipv.scatter(xs2, ys2, zs2, marker='sphere', size=0, connected=True)
+
+        #         ipv.animation_control(fig.scatters, sequence_length = 200, interval = 1000)
         print("Show")
         ipv.show()
 
@@ -293,7 +301,7 @@ class Plotter:
         """
         self.normalize(*x_axis)
         self.normalize(*y_axis)
-        
+
         x_axis = np.array(x_axis)
         x_axis = x_axis / np.linalg.norm(x_axis)
         y_axis = np.array(y_axis)
@@ -308,7 +316,7 @@ class Plotter:
             timestep_start = timestep_start + step
 
         #creating the graph
-        
+
         for time in times:
             timestep = time
             color = []

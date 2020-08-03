@@ -13,9 +13,8 @@ import seaborn as sns
 
 
 class Graph:
-    # constructor
     def __init__(self, proto_graph, timestep, color_scheme, num_colors):
-        #set the instance variables
+
         self.proto_graph = proto_graph
         self.timestep = timestep
         self.not_visited = set()
@@ -61,13 +60,12 @@ class Graph:
     def dfs(self, lines, color):
         """! \brief Searches graph.
 
-        Search the provided graph using depth first search, returns a bunch of lines.
-        \param Takes in hashmap representing graph.
-        \param Takes in a lookup for node_id to to node_vector.
-        \param Takes in a set representing not_visited nodes
-        \param Takes in an empty set representing nodes that have already been visited
+        Search the provided graph using depth first search, returns lines.
+        \param Takes in an empty list representing the lines
+        \param Takes in an empty list representing colors
 
-        Returns: Lines, which is a bunch of lines we can plot
+        Returns: lines, which is a bunch of lines we can plot
+        Returns: colors, which are the colors corresponding to the slip planes of the lines
             """
 
         sns.set()
@@ -76,9 +74,6 @@ class Graph:
         for colors in sns.color_palette(self.color_scheme, self.num_colors):
             color_lookup.update({num: colors})
             num = num + 1
-
-
-#         color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
         def search(current, previous, line, previous_slip, color,
                    first_iteration):
