@@ -13,9 +13,8 @@ import seaborn as sns
 
 
 class Graph:
-    # constructor
-    def __init__(self, proto_graph, timestep, color_scheme):
-        #set the instance variables
+    def __init__(self, proto_graph, timestep, color_scheme, num_colors):
+
         self.proto_graph = proto_graph
         self.timestep = timestep
         self.not_visited = set()
@@ -24,6 +23,7 @@ class Graph:
         self.graph_data = {}
         self.node_vectors = {}
         self.color_scheme = color_scheme
+        self.num_colors = num_colors
 
         graph = self.proto_graph
         vertices = graph.state[self.timestep].nodes
@@ -60,23 +60,26 @@ class Graph:
     def dfs(self, lines, color):
         """! \brief Searches graph.
 
-        Search the provided graph using depth first search, returns a bunch of lines.
-        \param Takes in hashmap representing graph.
-        \param Takes in a lookup for node_id to to node_vector.
-        \param Takes in a set representing not_visited nodes
-        \param Takes in an empty set representing nodes that have already been visited
+        Search the provided graph using depth first search, returns lines.
+        \param Takes in an empty list representing the lines
+        \param Takes in an empty list representing colors
 
-        Returns: Lines, which is a bunch of lines we can plot
+        Returns: lines, which is a bunch of lines we can plot
+        Returns: colors, which are the colors corresponding to the slip planes of the lines
             """
+
         sns.set()
         num = 0
         color_lookup = {}
-        for colors in sns.color_palette(self.color_scheme, 13):
+        for colors in sns.color_palette(self.color_scheme, self.num_colors):
             color_lookup.update({num: colors})
             num = num + 1
-#         color_lookup = {0: "red", 1: "blue", 2: "green", 3: "purple", 4: "orange"}
 
-        def search(current, previous, line, previous_slip, color):
+        def search(current, previous, line, previous_slip, color,
+                   first_iteration):
+
+            if len(self.visited) == 0:
+                first_iteration = True
 
             neighbors = self.graph_data[current]
 
@@ -94,24 +97,25 @@ class Graph:
 
             if not first_visit or end_of_line:
                 lines.append(branch)
-                color.append(color_lookup[previous_slip])
+                color.append(color_lookup[previous_slip % self.num_colors])
                 return
 
-            first_iteration = True
             for node in neighbors:
                 slip = self.links[current][node]
                 if slip != previous_slip:
                     if first_iteration:
                         lines.append(branch)
-                        color.append(color_lookup[slip])
+                        color.append(color_lookup[slip % self.num_colors])
+                        search(node, current, branch, slip, color, False)
                     branch = [here]
 
                 if node != previous:
-                    search(node, current, branch, slip, color)
+                    lines.append(branch)
+                    color.append(color_lookup[slip % self.num_colors])
+                    search(node, current, branch, slip, color, False)
                     branch = [here]
-                first_iteration = False
 
         while len(self.not_visited) > 0:
             start_node = self.not_visited.pop()
-            search(start_node, None, [], None, color)
+            search(start_node, None, [], None, color, False)
         return lines, color
