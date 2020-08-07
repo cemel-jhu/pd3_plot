@@ -9,8 +9,6 @@ from matplotlib import collections as mc
 import seaborn as sns
 import pylab as pl
 import importlib
-import Graph
-importlib.reload(Graph)
 from Graph import Graph
 import os, sys
 
@@ -54,7 +52,7 @@ class Plotter:
         return xs, ys, zs, x, y, z
 
     def is_normal(self, x_axis, y_axis):
-        """! \brief Tests whether the given vectors are normal 
+        """! \brief Tests whether the given vectors are normal.
 
         Test the given vectors to find out if they are normal and ensures that the two axises are orthogonal
         \param x and y axis
@@ -73,10 +71,10 @@ class Plotter:
                 num_colors=13,
                 do_vr=False):
         """! \brief Plots the dislocation system in 3D at the given timestep.
-        
+
         \param timestep The timestep to plot
         \param do_scatter Whether to plot dislocation nodes or not
-        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param color_scheme The color_scheme that the user wants the lines to be colored with
         \param num_colors The number of colors in the given color_scheme
         \param do_vr Whether to save the link for using VR or not
 
@@ -127,7 +125,7 @@ class Plotter:
         \param timestep The timestep to plot.
         \param x_axis The x axis to project the system on.
         \param y_axis The y axis to projec the system on.
-        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param color_scheme The color_scheme that the user wants the lines to be colored with
         """
 
         x_axis = self.normalize(*x_axis)
@@ -182,7 +180,7 @@ class Plotter:
         \param timestep_end The end time for plotting dislocations
         \param step The interval of how often the dislocations are plotted over the specified period of time
         \param do_scatter Whether to plot dislocation nodes or not.
-        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param color_scheme The color_scheme that the user wants the lines to be colored with
         \param num_colors The number of colors in the color_scheme
 
         """
@@ -232,7 +230,7 @@ class Plotter:
         \param timestep_end The end time for plotting dislocations
         \param step The interval of how often the dislocations are plotted over the specified period of time
         \param do_scatter Whether to plot dislocation nodes or not.
-        \param color_scheme The color_scheme that the user wants the lines to be colored with 
+        \param color_scheme The color_scheme that the user wants the lines to be colored with
         \param num_colors The number of colors in the color_scheme
         """
         x_axis = self.normalize(*x_axis)
