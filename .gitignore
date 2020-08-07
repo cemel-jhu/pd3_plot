@@ -1,3 +1,5 @@
 .ipynb_checkpoints
+*.html
 *.pb
+*.pbtxt
 __pycache__

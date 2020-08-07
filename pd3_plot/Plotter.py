@@ -8,8 +8,7 @@ from matplotlib.collections import LineCollection
 from matplotlib import collections as mc
 import seaborn as sns
 import pylab as pl
-import importlib
-from Graph import Graph
+from pd3_plot.Graph import Graph
 import os, sys
 
 
