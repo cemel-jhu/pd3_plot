@@ -1,4 +1,5 @@
 # pd3_plot
+[![DOI](https://zenodo.org/badge/267699330.svg)](https://zenodo.org/badge/latestdoi/267699330)
 ![PyPi Version](https://img.shields.io/pypi/v/pd3-plot.svg)
 
 ## Description
