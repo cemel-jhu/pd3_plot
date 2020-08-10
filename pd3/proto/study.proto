@@ -1,0 +1,73 @@
+// Study results
+//
+// This protobuf captures the output of a running study. Enabling use in
+// ParaView, and other custom visualization software.
+
+syntax = "proto3";
+package pd3.proto;
+
+// Node Type determines particular node behavior. There is a corollary in
+// pd3::NodeType
+enum NodeType {
+  // Node should not move. Note, this is not fully physical, but very useful.
+  IMMOBILE = 0;
+  // Node is capable of moving.
+  MOBILE = 1;
+  // Used internally, marks a trial segment. Do not use.
+  PLACEHOLDER = 2;
+}
+
+// Marks a position in space, and a NodeType.
+message Node {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  NodeType type = 4;
+}
+
+// Miller indices are typically 1x3 in cubic systems and 1x4 in hexagonal
+// systems. Currently hexagonal implementations are not supported.
+message Miller { repeated int32 indices = 1; }
+
+// Burgers vectors are expected to be expressed in terms of lattice points and a
+// ratio.
+message Burgers {
+  // A ratio of 1/inv_scale is applied to the Burgers vector value.
+  int32 inv_scale = 1;
+  Miller miller = 2;
+}
+
+// A list of edges/links/segments describing the DD graph.
+message Link {
+  // The relative leading node. This should index into State.nodes.
+  int64 leading = 1;
+  // The relative trailing node. This should index into State.nodes.
+  int64 trailing = 2;
+  // Stacking fault normal of this segment.
+  Miller normal = 3;
+  // Burgers vector of this segment.
+  Burgers burgers = 4;
+  // Burgers vector of this segment.
+  Miller plane = 5;
+  // How this link is reflected if it is periodic.
+  int32 periodicity_cell = 6;
+  // The slip system of this segment. Note this is set for paradis outputs, but
+  // not always pd3 outputs.
+  int32 slip = 7;
+}
+
+message State {
+  // Hash map of id to node. Id can be arbitrary, and in the current
+  // implementation is the raw pointer of the pd3::Node.
+  map<int64, Node> nodes = 1;
+  repeated Link links = 2;
+  // The simulation time of this state from simulation start.
+  double time = 3;
+}
+
+// All simulation states.
+message Series {
+  reserved 2, 3;
+  reserved "config", "precipitate";
+  repeated State state = 1;
+}

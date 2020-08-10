@@ -20,7 +20,7 @@ from setuptools.dist import Distribution
 # This version string is semver compatible, but incompatible with pip.
 # For pip, we will remove all '-' characters from this string, and use the
 # result for pip.
-_VERSION = '0.0.0'
+_VERSION = '1.0.0'
 
 REQUIRED_PACKAGES = [
     'absl-py >= 0.7.0',
@@ -33,7 +33,8 @@ REQUIRED_PACKAGES = [
     'scipy == 1.4.1',
     'seaborn==0.10.1',
     'ipyvolume==0.5.2',
-    'matplotlib==3.3.0'
+    'matplotlib==3.3.0',
+    'pd3 == 0.0.1'
 ]
 
 project_name = 'pd3_plot'
@@ -46,7 +47,7 @@ setup(
     long_description='\n'.join(DOCLINES[2:]),
     url='https://github.com/cemel-jhu/pd3_plot',
     download_url='https://github.com/cemel-jhu/pd3_plot/tags',
-    author='Dylan Madisetti',
+    authors='pd3 authors',
     author_emails=['madisetti@jhu.edu'],
     # Contained modules and scripts.
     packages=['pd3_plot'],

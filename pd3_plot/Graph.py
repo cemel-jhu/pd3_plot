@@ -57,32 +57,31 @@ class Graph:
 
         self.graph_data = g
 
-    def dfs(self, lines, color):
+    def dfs(self, lines=None, color=None):
         """! \brief Searches graph.
 
         Search the provided graph using depth first search, returns lines.
         \param Takes in an empty list representing the lines
         \param Takes in an empty list representing colors
 
-        Returns: lines, which is a bunch of lines we can plot
-        Returns: colors, which are the colors corresponding to the slip planes of the lines
-            """
+        Returns: lines, bunch of lines we can plot
+        Returns: colors, colors corresponding to the slip planes of the lines
+        """
 
-        sns.set()
-        num = 0
+        if lines is None:
+            lines = []
+
+        if color is None:
+            color = []
+
         color_lookup = {}
-        for colors in sns.color_palette(self.color_scheme, self.num_colors):
+        for num, colors in enumerate(
+                sns.color_palette(self.color_scheme, self.num_colors)):
             color_lookup.update({num: colors})
-            num = num + 1
 
-        def search(current, previous, line, previous_slip, color,
-                   first_iteration):
-
-            if len(self.visited) == 0:
-                first_iteration = True
+        def search(current, previous, line, previous_slip, first):
 
             neighbors = self.graph_data[current]
-
             here = self.node_vectors[current]
 
             branch = line
@@ -100,22 +99,30 @@ class Graph:
                 color.append(color_lookup[previous_slip % self.num_colors])
                 return
 
+            taken_branch = None
             for node in neighbors:
                 slip = self.links[current][node]
-                if slip != previous_slip:
-                    if first_iteration:
-                        lines.append(branch)
-                        color.append(color_lookup[slip % self.num_colors])
-                        search(node, current, branch, slip, color, False)
-                    branch = [here]
+                # For our very first progression, we just want to choose any
+                # branch to progress down. Or we continue a branch witht the
+                # same slip.
+                if first or (slip == previous_slip and node != previous):
+                    search(node, current, branch, slip, False)
+                    taken_branch = node
+                    break
 
-                if node != previous:
-                    lines.append(branch)
-                    color.append(color_lookup[slip % self.num_colors])
-                    search(node, current, branch, slip, color, False)
+            for node in neighbors:
+                slip = self.links[current][node]
+                if node not in (previous, taken_branch):
                     branch = [here]
+                    search(node, current, branch, slip, False)
+
+            # If the line is not continued, then we need to record it.
+            if taken_branch is None:
+                lines.append(line)
+                color.append(color_lookup[previous_slip % self.num_colors])
 
         while len(self.not_visited) > 0:
             start_node = self.not_visited.pop()
-            search(start_node, None, [], None, color, False)
-        return lines, color
+            search(start_node, None, [], None, True)
+
+        return np.array(lines), color

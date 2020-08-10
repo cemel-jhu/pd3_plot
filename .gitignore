@@ -1,4 +1,6 @@
 .ipynb_checkpoints
+dist/
+*.egg-info
 *.html
 *.pb
 *.pbtxt
