@@ -30,11 +30,11 @@ REQUIRED_PACKAGES = [
     'six >= 1.12.0',
     'typing-extensions >= 3.7.4',
     # scipy < 1.4.1 causes segfaults due to pybind11
-    'scipy == 1.4.1',
-    'seaborn==0.10.1',
-    'ipyvolume==0.5.2',
-    'matplotlib==3.3.0',
-    'pd3 == 0.0.1'
+    'scipy >= 1.4.1',
+    'seaborn>=0.10.1',
+    'ipyvolume>=0.5.2',
+    'matplotlib>=3.3.0',
+    'pd3 >= 0.0.1'
 ]
 
 project_name = 'pd3_plot'
